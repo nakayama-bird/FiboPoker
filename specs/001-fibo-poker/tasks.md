@@ -74,18 +74,18 @@ description: "Task list for Fibonacci Poker implementation"
 
 ### Room Management for US1
 
-- [ ] T024 [P] [US1] Create roomService.createRoom() in src/services/roomService.ts (implements FR-001, FR-002)
-- [ ] T025 [P] [US1] Create roomService.getRoomByCode() in src/services/roomService.ts
-- [ ] T026 [P] [US1] Create useRoom() custom hook in src/hooks/useRoom.ts
-- [ ] T027 [US1] Create HomePage component with "Create Room" button in src/components/HomePage.tsx
-- [ ] T028 [US1] Implement room creation flow: button click → API call → redirect to /room/:code (SC-001: 30秒以内)
+- [X] T024 [P] [US1] Create roomService.createRoom() in src/services/roomService.ts (implements FR-001, FR-002)
+- [X] T025 [P] [US1] Create roomService.getRoomByCode() in src/services/roomService.ts
+- [X] T026 [P] [US1] Create useRoom() custom hook in src/hooks/useRoom.ts
+- [X] T027 [US1] Create HomePage component with "Create Room" button in src/components/HomePage.tsx
+- [X] T028 [US1] Implement room creation flow: button click → API call → redirect to /room/:code (SC-001: 30秒以内)
 
 ### Participant Management for US1
 
-- [ ] T029 [P] [US1] Implement Supabase Anonymous Auth in src/services/supabase.ts
-- [ ] T030 [P] [US1] Create participantService.joinRoom() in src/services/participantService.ts (implements FR-011)
-- [ ] T031 [US1] Create display name input component in src/components/DisplayNameInput.tsx
-- [ ] T032 [US1] Integrate display name input in RoomPage on first visit
+- [X] T029 [P] [US1] Implement Supabase Anonymous Auth in src/services/supabase.ts
+- [X] T030 [P] [US1] Create participantService.joinRoom() in src/services/participantService.ts (implements FR-011)
+- [X] T031 [US1] Create display name input component in src/components/DisplayNameInput.tsx
+- [X] T032 [US1] Integrate display name input in RoomPage on first visit
 
 ### Round & Card Selection for US1
 
