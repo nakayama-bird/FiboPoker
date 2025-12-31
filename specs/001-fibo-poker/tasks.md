@@ -41,26 +41,26 @@ description: "Task list for Fibonacci Poker implementation"
 
 ### Supabase Setup
 
-- [ ] T007 Create Supabase project and obtain URL + ANON_KEY
-- [ ] T008 Create database migration file: supabase/migrations/001_initial_schema.sql
-- [ ] T009 [P] Define rooms table with uuid, code, status, timestamps in migration
-- [ ] T010 [P] Define participants table with room_id FK, session_id, display_name in migration
-- [ ] T011 [P] Define rounds table with room_id FK, round_number, status, statistics in migration
-- [ ] T012 [P] Define card_selections table with round_id FK, participant_id FK, card_value CHECK constraint in migration
-- [ ] T013 Create update_updated_at_column() trigger function in migration
-- [ ] T014 Create calculate_round_statistics() function per [data-model.md](data-model.md) in migration
-- [ ] T015 Create cleanup_inactive_rooms() function in supabase/functions/cleanup_inactive_rooms.sql
-- [ ] T016 Apply migration to Supabase project and verify schema
-- [ ] T017 Configure Row Level Security (RLS) policies per [data-model.md](data-model.md)
-- [ ] T018 Enable Realtime for participants, card_selections, rounds tables
+- [X] T007 Create Supabase project and obtain URL + ANON_KEY
+- [X] T008 Create database migration file: supabase/migrations/001_initial_schema.sql
+- [X] T009 [P] Define rooms table with uuid, code, status, timestamps in migration
+- [X] T010 [P] Define participants table with room_id FK, session_id, display_name in migration
+- [X] T011 [P] Define rounds table with room_id FK, round_number, status, statistics in migration
+- [X] T012 [P] Define card_selections table with round_id FK, participant_id FK, card_value CHECK constraint in migration
+- [X] T013 Create update_updated_at_column() trigger function in migration
+- [X] T014 Create calculate_round_statistics() function per [data-model.md](data-model.md) in migration
+- [X] T015 Create cleanup_inactive_rooms() function in supabase/functions/cleanup_inactive_rooms.sql
+- [X] T016 Apply migration to Supabase project and verify schema
+- [X] T017 Configure Row Level Security (RLS) policies per [data-model.md](data-model.md)
+- [X] T018 Enable Realtime for participants, card_selections, rounds tables
 
 ### Application Foundation
 
-- [ ] T019 Create Supabase client in src/services/supabase.ts with env variables
-- [ ] T020 [P] Create TypeScript types from database schema in src/types/database.ts
-- [ ] T021 [P] Setup React Router with /room/:code route in src/App.tsx
-- [ ] T022 [P] Create base layout component in src/components/Layout.tsx
-- [ ] T023 [P] Create error boundary component in src/components/ErrorBoundary.tsx
+- [X] T019 Create Supabase client in src/services/supabase.ts with env variables
+- [X] T020 [P] Create TypeScript types from database schema in src/types/database.ts
+- [X] T021 [P] Setup React Router with /room/:code route in src/App.tsx
+- [X] T022 [P] Create base layout component in src/components/Layout.tsx
+- [X] T023 [P] Create error boundary component in src/components/ErrorBoundary.tsx
 
 **Checkpoint**: 基盤準備完了 - ユーザーストーリーの実装を並行開始可能
 
