@@ -24,12 +24,12 @@ description: "Task list for Fibonacci Poker implementation"
 
 **Purpose**: プロジェクト初期化と基本構造
 
-- [ ] T001 Create Vite + React + TypeScript project structure per [plan.md](plan.md)
-- [ ] T002 Install dependencies: react@18.3, react-router-dom@6.21, @supabase/supabase-js@2.39, vite@5.0
-- [ ] T003 [P] Configure TypeScript strict mode in tsconfig.json
-- [ ] T004 [P] Configure Vite build settings in vite.config.ts
-- [ ] T005 [P] Setup CSS Modules configuration in vite.config.ts
-- [ ] T006 Create .env.example with Supabase URL and ANON_KEY placeholders
+- [X] T001 Create Vite + React + TypeScript project structure per [plan.md](plan.md)
+- [X] T002 Install dependencies: react@18.3, react-router-dom@6.21, @supabase/supabase-js@2.39, vite@5.0
+- [X] T003 [P] Configure TypeScript strict mode in tsconfig.json
+- [X] T004 [P] Configure Vite build settings in vite.config.ts
+- [X] T005 [P] Setup CSS Modules configuration in vite.config.ts
+- [X] T006 Create .env.example with Supabase URL and ANON_KEY placeholders
 
 ---
 
