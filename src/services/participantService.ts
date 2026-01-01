@@ -39,19 +39,19 @@ export async function joinRoom({ roomId, displayName }: JoinRoomParams): Promise
     .single();
 
   if (existing) {
-    // Update existing participant
-    const { data, error } = await supabase
+    // Update existing participant  
+    const { data, error: updateError } = await supabase
       .from('participants')
       .update({
         display_name: displayName,
         is_active: true,
-      })
-      .eq('id', existing.id)
+      } as never)
+      .eq('id', (existing as any).id)
       .select()
       .single();
 
-    if (error) {
-      throw new Error(`Failed to update participant: ${error.message}`);
+    if (updateError) {
+      throw new Error(`Failed to update participant: ${updateError.message}`);
     }
 
     return data;
@@ -65,7 +65,7 @@ export async function joinRoom({ roomId, displayName }: JoinRoomParams): Promise
       session_id: user.id,
       display_name: displayName,
       is_active: true,
-    })
+    } as any)
     .select()
     .single();
 

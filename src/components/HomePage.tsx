@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createRoom } from '../services/roomService';
 import Layout from './Layout';
+import styles from '../styles/HomePage.module.css';
 
 // T027: HomePage component with "Create Room" button (implements FR-001)
 export default function HomePage() {
@@ -28,29 +29,20 @@ export default function HomePage() {
 
   return (
     <Layout>
-      <div style={{ textAlign: 'center', padding: '40px 20px' }}>
-        <h1>Fibonacci Planning Poker</h1>
-        <p>Create a room to start estimating with your team</p>
+      <div className={styles.container}>
+        <h1 className={styles.title}>Fibonacci Poker</h1>
+        <p className={styles.subtitle}>アジャイル開発のための見積もりツール</p>
         
         <button
           onClick={handleCreateRoom}
           disabled={loading}
-          style={{
-            marginTop: '20px',
-            padding: '12px 24px',
-            fontSize: '16px',
-            cursor: loading ? 'not-allowed' : 'pointer',
-            backgroundColor: loading ? '#ccc' : '#007bff',
-            color: 'white',
-            border: 'none',
-            borderRadius: '4px',
-          }}
+          className={styles.createButton}
         >
           {loading ? 'Creating...' : 'Create Room'}
         </button>
         
         {error && (
-          <p style={{ color: 'red', marginTop: '20px' }}>{error}</p>
+          <p style={{ color: '#dc2626', marginTop: '1rem', textAlign: 'center' }}>{error}</p>
         )}
       </div>
     </Layout>

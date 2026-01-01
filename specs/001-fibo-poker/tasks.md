@@ -89,20 +89,20 @@ description: "Task list for Fibonacci Poker implementation"
 
 ### Round & Card Selection for US1
 
-- [ ] T033 [P] [US1] Create roundService.startRound() in src/services/roundService.ts
-- [ ] T034 [P] [US1] Create cardSelectionService.selectCard() in src/services/cardSelectionService.ts (implements FR-004)
-- [ ] T035 [P] [US1] Create cardSelectionService.updateCard() for changing selection (implements FR-005)
-- [ ] T036 [P] [US1] Create CardSelector component with Fibonacci cards (1,2,3,5,8,13,21) in src/components/CardSelector.tsx (implements FR-003)
-- [ ] T037 [US1] Create RoomPage component structure with state management in src/components/RoomPage.tsx
-- [ ] T038 [US1] Integrate CardSelector into RoomPage with selection handling
-- [ ] T039 [US1] Implement visual highlight for selected card (SC-003: 300ms応答)
-- [ ] T040 [US1] Add card change functionality: clicking another card updates selection
+- [X] T033 [P] [US1] Create roundService.startRound() in src/services/roundService.ts
+- [X] T034 [P] [US1] Create cardSelectionService.selectCard() in src/services/cardSelectionService.ts (implements FR-004)
+- [X] T035 [P] [US1] Create cardSelectionService.updateCard() for changing selection (implements FR-005)
+- [X] T036 [P] [US1] Create CardSelector component with Fibonacci cards (1,2,3,5,8,13,21) in src/components/CardSelector.tsx (implements FR-003)
+- [X] T037 [US1] Create RoomPage component structure with state management in src/components/RoomPage.tsx
+- [X] T038 [US1] Integrate CardSelector into RoomPage with selection handling
+- [X] T039 [US1] Implement visual highlight for selected card (SC-003: 300ms応答)
+- [X] T040 [US1] Add card change functionality: clicking another card updates selection
 
 ### Styling for US1
 
-- [ ] T041 [P] [US1] Create CSS Module for HomePage in src/styles/HomePage.module.css
-- [ ] T042 [P] [US1] Create CSS Module for CardSelector in src/styles/CardSelector.module.css
-- [ ] T043 [P] [US1] Create CSS Module for RoomPage in src/styles/RoomPage.module.css
+- [X] T041 [P] [US1] Create CSS Module for HomePage in src/styles/HomePage.module.css
+- [X] T042 [P] [US1] Create CSS Module for CardSelector in src/styles/CardSelector.module.css
+- [X] T043 [P] [US1] Create CSS Module for RoomPage in src/styles/RoomPage.module.css
 
 **Checkpoint**: この時点で、User Story 1が完全に機能し独立してテスト可能です
 

@@ -1,4 +1,5 @@
-import { useState, FormEvent } from 'react';
+import { useState, type FormEvent } from 'react';
+import styles from '../styles/DisplayNameInput.module.css';
 
 interface DisplayNameInputProps {
   onSubmit: (displayName: string) => void;
@@ -17,42 +18,31 @@ export default function DisplayNameInput({ onSubmit, loading = false }: DisplayN
   };
 
   return (
-    <div style={{ maxWidth: '400px', margin: '0 auto', padding: '40px 20px' }}>
-      <h2>Join Room</h2>
-      <p>Enter your display name to join this room</p>
+    <div className={styles.container}>
+      <h2 className={styles.title}>Join Room</h2>
       
-      <form onSubmit={handleSubmit}>
-        <input
-          type="text"
-          value={displayName}
-          onChange={(e) => setDisplayName(e.target.value)}
-          placeholder="Your name"
-          maxLength={50}
-          required
-          disabled={loading}
-          style={{
-            width: '100%',
-            padding: '12px',
-            fontSize: '16px',
-            border: '1px solid #ccc',
-            borderRadius: '4px',
-            marginBottom: '16px',
-          }}
-        />
+      <form onSubmit={handleSubmit} className={styles.form}>
+        <div className={styles.inputGroup}>
+          <label htmlFor="displayName" className={styles.label}>
+            Display Name
+          </label>
+          <input
+            type="text"
+            id="displayName"
+            value={displayName}
+            onChange={(e) => setDisplayName(e.target.value)}
+            placeholder="Enter your name"
+            maxLength={50}
+            required
+            disabled={loading}
+            className={styles.input}
+          />
+        </div>
         
         <button
           type="submit"
           disabled={loading || !displayName.trim()}
-          style={{
-            width: '100%',
-            padding: '12px',
-            fontSize: '16px',
-            cursor: loading || !displayName.trim() ? 'not-allowed' : 'pointer',
-            backgroundColor: loading || !displayName.trim() ? '#ccc' : '#007bff',
-            color: 'white',
-            border: 'none',
-            borderRadius: '4px',
-          }}
+          className={styles.submitButton}
         >
           {loading ? 'Joining...' : 'Join Room'}
         </button>

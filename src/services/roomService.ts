@@ -40,7 +40,7 @@ export async function createRoom(): Promise<CreateRoomResponse> {
     .insert({
       code: codeData as string,
       status: 'active',
-    })
+    } as any)
     .select()
     .single();
 
