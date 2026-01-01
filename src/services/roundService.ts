@@ -44,6 +44,32 @@ export async function startRound(roomId: string): Promise<Round> {
   return data;
 }
 
+// T050: Trigger statistics calculation (calls PostgreSQL function)
+export async function calculateStatistics(roundId: string): Promise<void> {
+  const { error } = await supabase.rpc('calculate_round_statistics', {
+    p_round_id: roundId,
+  } as any);
+
+  if (error) {
+    throw new Error(`Failed to calculate statistics: ${error.message}`);
+  }
+}
+
+// T051: Update round status to 'revealed'
+export async function updateRoundStatus(
+  roundId: string,
+  status: 'selecting' | 'revealed'
+): Promise<void> {
+  const { error } = await (supabase
+    .from('rounds')
+    .update({ status } as never) as any)
+    .eq('id', roundId);
+
+  if (error) {
+    throw new Error(`Failed to update round status: ${error.message}`);
+  }
+}
+
 // Get current round for a room
 export async function getCurrentRound(roomId: string): Promise<Round | null> {
   const { data, error } = await supabase

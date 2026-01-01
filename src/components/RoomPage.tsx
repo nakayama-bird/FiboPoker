@@ -1,17 +1,19 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { useRoom } from '../hooks/useRoom';
+import { useRealtime } from '../hooks/useRealtime';
 import { joinRoom, getCurrentParticipant } from '../services/participantService';
-import { startRound, getCurrentRound } from '../services/roundService';
+import { startRound, getCurrentRound, calculateStatistics, updateRoundStatus } from '../services/roundService';
 import { selectCard, getCardSelection } from '../services/cardSelectionService';
+import { checkAllSelected } from '../services/completionService';
 import Layout from './Layout';
 import DisplayNameInput from './DisplayNameInput';
 import CardSelector from './CardSelector';
 
-// T037-T040: RoomPage with card selection integration
+// T037-T040, T048: RoomPage with card selection and realtime integration
 export default function RoomPage() {
   const { code } = useParams<{ code: string }>();
-  const { room, loading: roomLoading, error: roomError } = useRoom(code || '');
+  const { room, loading: roomLoading, error: roomError, refetch: refetchRoom } = useRoom(code || '');
   const [participant, setParticipant] = useState<any>(null);
   const [joining, setJoining] = useState(false);
   const [joinError, setJoinError] = useState<string | null>(null);
@@ -20,6 +22,34 @@ export default function RoomPage() {
   const [currentRound, setCurrentRound] = useState<any>(null);
   const [selectedCard, setSelectedCard] = useState<number | null>(null);
   const [selecting, setSelecting] = useState(false);
+
+  // T048: Realtime callbacks
+  const handleParticipantChange = useCallback(() => {
+    if (refetchRoom) {
+      refetchRoom();
+    }
+  }, [refetchRoom]);
+
+  const handleCardSelectionChange = useCallback(() => {
+    if (refetchRoom) {
+      refetchRoom();
+    }
+  }, [refetchRoom]);
+
+  const handleRoundChange = useCallback(() => {
+    if (refetchRoom) {
+      refetchRoom();
+    }
+  }, [refetchRoom]);
+
+  // T048: Setup realtime subscriptions
+  useRealtime({
+    roomId: room?.id || '',
+    roundId: currentRound?.id,
+    onParticipantChange: room ? handleParticipantChange : undefined,
+    onCardSelectionChange: currentRound ? handleCardSelectionChange : undefined,
+    onRoundChange: room ? handleRoundChange : undefined,
+  });
 
   // Check if user is already a participant
   useEffect(() => {
@@ -54,6 +84,43 @@ export default function RoomPage() {
     }
     fetchRound();
   }, [room, participant]);
+
+  // T052: Completion detection - check when selections change
+  useEffect(() => {
+    async function checkCompletion() {
+      if (!room || !currentRound || currentRound.status !== 'selecting') {
+        return;
+      }
+
+      try {
+        // Get active participant IDs
+        const activeParticipantIds = room.participants
+          ?.filter((p: any) => p.is_active)
+          .map((p: any) => p.id) || [];
+        
+        const result = await checkAllSelected(
+          currentRound.id,
+          activeParticipantIds
+        );
+        
+        if (result.allSelected) {
+          // FR-006: Auto-reveal when all users selected
+          await calculateStatistics(currentRound.id);
+          await updateRoundStatus(currentRound.id, 'revealed');
+          
+          // Force refresh to show revealed state
+          if (refetchRoom) {
+            await refetchRoom();
+          }
+        }
+      } catch (error) {
+        console.error('Failed to check completion:', error);
+      }
+    }
+
+    checkCompletion();
+    // Check on room changes (triggered by Realtime card selections)
+  }, [room, currentRound]);
 
   // T032: Integrate display name input in RoomPage on first visit
   const handleJoinRoom = async (displayName: string) => {
