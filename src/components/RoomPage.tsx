@@ -22,7 +22,6 @@ export default function RoomPage() {
   // Round and card selection state
   const [currentRound, setCurrentRound] = useState<any>(null);
   const [selectedCard, setSelectedCard] = useState<number | null>(null);
-  const [selecting, setSelecting] = useState(false);
   const [cardSelections, setCardSelections] = useState<any[]>([]);
 
   // T048: Realtime callbacks
@@ -32,16 +31,12 @@ export default function RoomPage() {
     }
   }, [refetchRoom]);
 
-  const handleCardSelectionChange = useCallback(async () => {
-    // Refetch round to check if status changed
-    if (room) {
-      const round = await getCurrentRound(room.id);
-      setCurrentRound(round);
-    }
+  const handleCardSelectionChange = useCallback(() => {
+    // Refetch room data (includes participants count updates)
     if (refetchRoom) {
       refetchRoom();
     }
-  }, [refetchRoom, room]);
+  }, [refetchRoom]);
 
   const handleRoundChange = useCallback(async () => {
     if (room) {
@@ -175,18 +170,15 @@ export default function RoomPage() {
     }
   };
 
-  // T040: Handle card selection (implements FR-004, FR-005)
+  // T040: Handle card selection (implements FR-004) - one-time selection
   const handleCardSelect = async (cardValue: number) => {
-    if (!currentRound || !participant) return;
+    if (!currentRound || !participant || selectedCard !== null) return;
     
     try {
-      setSelecting(true);
       await selectCard(currentRound.id, participant.id, cardValue);
       setSelectedCard(cardValue); // SC-003: Immediate visual feedback
     } catch (err) {
       console.error('Failed to select card:', err);
-    } finally {
-      setSelecting(false);
     }
   };
 
@@ -238,7 +230,7 @@ export default function RoomPage() {
               <CardSelector 
                 selectedCard={selectedCard}
                 onSelect={handleCardSelect}
-                disabled={selecting}
+                disabled={selectedCard !== null}
               />
             ) : (
               <ResultsView
