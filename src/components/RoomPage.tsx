@@ -4,11 +4,12 @@ import { useRoom } from '../hooks/useRoom';
 import { useRealtime } from '../hooks/useRealtime';
 import { joinRoom, getCurrentParticipant } from '../services/participantService';
 import { startRound, getCurrentRound, calculateStatistics, updateRoundStatus } from '../services/roundService';
-import { selectCard, getCardSelection } from '../services/cardSelectionService';
+import { selectCard, getCardSelection, getCardSelections } from '../services/cardSelectionService';
 import { checkAllSelected } from '../services/completionService';
 import Layout from './Layout';
 import DisplayNameInput from './DisplayNameInput';
 import CardSelector from './CardSelector';
+import ResultsView from './ResultsView';
 
 // T037-T040, T048: RoomPage with card selection and realtime integration
 export default function RoomPage() {
@@ -22,6 +23,7 @@ export default function RoomPage() {
   const [currentRound, setCurrentRound] = useState<any>(null);
   const [selectedCard, setSelectedCard] = useState<number | null>(null);
   const [selecting, setSelecting] = useState(false);
+  const [cardSelections, setCardSelections] = useState<any[]>([]);
 
   // T048: Realtime callbacks
   const handleParticipantChange = useCallback(() => {
@@ -30,17 +32,26 @@ export default function RoomPage() {
     }
   }, [refetchRoom]);
 
-  const handleCardSelectionChange = useCallback(() => {
+  const handleCardSelectionChange = useCallback(async () => {
+    // Refetch round to check if status changed
+    if (room) {
+      const round = await getCurrentRound(room.id);
+      setCurrentRound(round);
+    }
     if (refetchRoom) {
       refetchRoom();
     }
-  }, [refetchRoom]);
+  }, [refetchRoom, room]);
 
-  const handleRoundChange = useCallback(() => {
+  const handleRoundChange = useCallback(async () => {
+    if (room) {
+      const round = await getCurrentRound(room.id);
+      setCurrentRound(round);
+    }
     if (refetchRoom) {
       refetchRoom();
     }
-  }, [refetchRoom]);
+  }, [refetchRoom, room]);
 
   // T048: Setup realtime subscriptions
   useRealtime({
@@ -75,6 +86,12 @@ export default function RoomPage() {
           if (selection) {
             setSelectedCard(selection.card_value);
           }
+          
+          // Load all selections for revealed rounds
+          if (round.status === 'revealed') {
+            const allSelections = await getCardSelections(round.id);
+            setCardSelections(allSelections);
+          }
         } else {
           // Auto-start first round
           const newRound = await startRound(room.id);
@@ -84,6 +101,17 @@ export default function RoomPage() {
     }
     fetchRound();
   }, [room, participant]);
+
+  // Load card selections when round is revealed
+  useEffect(() => {
+    async function loadSelections() {
+      if (currentRound && currentRound.status === 'revealed') {
+        const allSelections = await getCardSelections(currentRound.id);
+        setCardSelections(allSelections);
+      }
+    }
+    loadSelections();
+  }, [currentRound?.status, currentRound?.id]);
 
   // T052: Completion detection - check when selections change
   useEffect(() => {
@@ -107,6 +135,10 @@ export default function RoomPage() {
           // FR-006: Auto-reveal when all users selected
           await calculateStatistics(currentRound.id);
           await updateRoundStatus(currentRound.id, 'revealed');
+          
+          // Load all selections for display
+          const allSelections = await getCardSelections(currentRound.id);
+          setCardSelections(allSelections);
           
           // Force refresh to show revealed state
           if (refetchRoom) {
@@ -191,7 +223,7 @@ export default function RoomPage() {
     );
   }
 
-  // T038: Integrate CardSelector component
+  // T038: Integrate CardSelector component / T056: Show ResultsView when revealed
   return (
     <Layout>
       <div style={{ padding: '20px' }}>
@@ -201,11 +233,20 @@ export default function RoomPage() {
         {currentRound && (
           <div style={{ marginTop: '30px' }}>
             <h3>Round {currentRound.round_number}</h3>
-            <CardSelector 
-              selectedCard={selectedCard}
-              onSelect={handleCardSelect}
-              disabled={selecting || currentRound.status !== 'selecting'}
-            />
+            
+            {currentRound.status === 'selecting' ? (
+              <CardSelector 
+                selectedCard={selectedCard}
+                onSelect={handleCardSelect}
+                disabled={selecting}
+              />
+            ) : (
+              <ResultsView
+                round={currentRound}
+                participants={room.participants}
+                selections={cardSelections}
+              />
+            )}
           </div>
         )}
         

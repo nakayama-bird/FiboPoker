@@ -131,11 +131,11 @@ description: "Task list for Fibonacci Poker implementation"
 
 ### Results Display for US2
 
-- [ ] T053 [P] [US2] Create ResultsView component in src/components/ResultsView.tsx (implements FR-009)
-- [ ] T054 [P] [US2] Create StatisticsDisplay component for max/min/median/avg in src/components/StatisticsDisplay.tsx (implements FR-008)
-- [ ] T055 [P] [US2] Create ParticipantCards component showing all selections in src/components/ParticipantCards.tsx
-- [ ] T056 [US2] Integrate ResultsView into RoomPage with state-driven switching
-- [ ] T057 [US2] Ensure results delivery within 1 second of completion (implements FR-007, SC-002)
+- [X] T053 [P] [US2] Create ResultsView component in src/components/ResultsView.tsx (implements FR-009)
+- [X] T054 [P] [US2] Create StatisticsDisplay component for max/min/median/avg in src/components/StatisticsDisplay.tsx (implements FR-008)
+- [X] T055 [P] [US2] Create ParticipantCards component showing all selections in src/components/ParticipantCards.tsx
+- [X] T056 [US2] Integrate ResultsView into RoomPage with state-driven switching
+- [X] T057 [US2] Ensure results delivery within 1 second of completion (implements FR-007, SC-002)
 
 ### New Round for US2
 
