@@ -116,32 +116,32 @@ description: "Task list for Fibonacci Poker implementation"
 
 ### Realtime Foundation for US2
 
-- [ ] T044 [P] [US2] Create realtimeService.subscribeToParticipants() in src/services/realtimeService.ts
-- [ ] T045 [P] [US2] Create realtimeService.subscribeToCardSelections() in src/services/realtimeService.ts
-- [ ] T046 [P] [US2] Create realtimeService.subscribeToRounds() in src/services/realtimeService.ts
-- [ ] T047 [P] [US2] Create useRealtime() custom hook in src/hooks/useRealtime.ts
-- [ ] T048 [US2] Integrate useRealtime into RoomPage for live updates
+- [X] T044 [P] [US2] Create realtimeService.subscribeToParticipants() in src/services/realtimeService.ts
+- [X] T045 [P] [US2] Create realtimeService.subscribeToCardSelections() in src/services/realtimeService.ts
+- [X] T046 [P] [US2] Create realtimeService.subscribeToRounds() in src/services/realtimeService.ts
+- [X] T047 [P] [US2] Create useRealtime() custom hook in src/hooks/useRealtime.ts
+- [X] T048 [US2] Integrate useRealtime into RoomPage for live updates
 
 ### Completion Detection for US2
 
-- [ ] T049 [US2] Implement client-side completion detection logic in RoomPage (implements FR-006)
-- [ ] T050 [US2] Create completionService.checkAllSelected() in src/services/completionService.ts
-- [ ] T051 [US2] Trigger calculate_round_statistics() PostgreSQL function on completion
-- [ ] T052 [US2] Update rounds.status to 'revealed' after statistics calculation
+- [X] T049 [US2] Implement client-side completion detection logic in RoomPage (implements FR-006)
+- [X] T050 [US2] Create completionService.checkAllSelected() in src/services/completionService.ts
+- [X] T051 [US2] Trigger calculate_round_statistics() PostgreSQL function on completion
+- [X] T052 [US2] Update rounds.status to 'revealed' after statistics calculation
 
 ### Results Display for US2
 
-- [ ] T053 [P] [US2] Create ResultsView component in src/components/ResultsView.tsx (implements FR-009)
-- [ ] T054 [P] [US2] Create StatisticsDisplay component for max/min/median/avg in src/components/StatisticsDisplay.tsx (implements FR-008)
-- [ ] T055 [P] [US2] Create ParticipantCards component showing all selections in src/components/ParticipantCards.tsx
-- [ ] T056 [US2] Integrate ResultsView into RoomPage with state-driven switching
-- [ ] T057 [US2] Ensure results delivery within 1 second of completion (implements FR-007, SC-002)
+- [X] T053 [P] [US2] Create ResultsView component in src/components/ResultsView.tsx (implements FR-009)
+- [X] T054 [P] [US2] Create StatisticsDisplay component for max/min/median/avg in src/components/StatisticsDisplay.tsx (implements FR-008)
+- [X] T055 [P] [US2] Create ParticipantCards component showing all selections in src/components/ParticipantCards.tsx
+- [X] T056 [US2] Integrate ResultsView into RoomPage with state-driven switching
+- [X] T057 [US2] Ensure results delivery within 1 second of completion (implements FR-007, SC-002)
 
 ### New Round for US2
 
-- [ ] T058 [P] [US2] Create "Start New Round" button component in src/components/NewRoundButton.tsx
-- [ ] T059 [US2] Implement new round flow: button → roundService.startRound() → reset UI to selecting state (implements FR-014)
-- [ ] T060 [US2] Clear previous card selections on new round start
+- [X] T058 [P] [US2] Create "Start New Round" button component in src/components/NewRoundButton.tsx
+- [X] T059 [US2] Implement new round flow: button → roundService.startRound() → reset UI to selecting state (implements FR-014)
+- [X] T060 [US2] Clear previous card selections on new round start
 
 ### Styling for US2
 

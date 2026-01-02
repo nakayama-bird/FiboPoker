@@ -54,12 +54,9 @@ export async function getCardSelection(
     .select()
     .eq('round_id', roundId)
     .eq('participant_id', participantId)
-    .single();
+    .maybeSingle();
 
   if (error) {
-    if (error.code === 'PGRST116') {
-      return null;
-    }
     throw new Error(`Failed to get card selection: ${error.message}`);
   }
 

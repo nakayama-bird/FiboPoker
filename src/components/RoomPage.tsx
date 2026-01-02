@@ -1,17 +1,22 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { useRoom } from '../hooks/useRoom';
+import { useRealtime } from '../hooks/useRealtime';
 import { joinRoom, getCurrentParticipant } from '../services/participantService';
-import { startRound, getCurrentRound } from '../services/roundService';
-import { selectCard, getCardSelection } from '../services/cardSelectionService';
+import { startRound, getCurrentRound, calculateStatistics, updateRoundStatus } from '../services/roundService';
+import { selectCard, getCardSelection, getCardSelections } from '../services/cardSelectionService';
+import { checkAllSelected } from '../services/completionService';
 import Layout from './Layout';
 import DisplayNameInput from './DisplayNameInput';
 import CardSelector from './CardSelector';
+import ResultsView from './ResultsView';
+import NewRoundButton from './NewRoundButton';
+import WaitingRoom from './WaitingRoom';
 
-// T037-T040: RoomPage with card selection integration
+// T037-T040, T048: RoomPage with card selection and realtime integration
 export default function RoomPage() {
   const { code } = useParams<{ code: string }>();
-  const { room, loading: roomLoading, error: roomError } = useRoom(code || '');
+  const { room, loading: roomLoading, error: roomError, refetch: refetchRoom } = useRoom(code || '');
   const [participant, setParticipant] = useState<any>(null);
   const [joining, setJoining] = useState(false);
   const [joinError, setJoinError] = useState<string | null>(null);
@@ -19,7 +24,43 @@ export default function RoomPage() {
   // Round and card selection state
   const [currentRound, setCurrentRound] = useState<any>(null);
   const [selectedCard, setSelectedCard] = useState<number | null>(null);
-  const [selecting, setSelecting] = useState(false);
+  const [cardSelections, setCardSelections] = useState<any[]>([]);
+
+  // T048: Realtime callbacks
+  const handleParticipantChange = useCallback(() => {
+    if (refetchRoom) {
+      refetchRoom();
+    }
+  }, [refetchRoom]);
+
+  const handleCardSelectionChange = useCallback(() => {
+    // Refetch room data (includes participants count updates)
+    if (refetchRoom) {
+      refetchRoom();
+    }
+  }, [refetchRoom]);
+
+  const handleRoundChange = useCallback(async (payload: any) => {
+    if (payload.eventType === 'INSERT' || payload.eventType === 'UPDATE') {
+      const newRound = payload.new;
+      setCurrentRound(newRound);
+      
+      // Reset selected card and selections when new round starts
+      if (payload.eventType === 'INSERT') {
+        setSelectedCard(null);
+        setCardSelections([]);
+      }
+    }
+  }, []);
+
+  // T048: Setup realtime subscriptions
+  useRealtime({
+    roomId: room?.id || '',
+    roundId: currentRound?.id,
+    onParticipantChange: room ? handleParticipantChange : undefined,
+    onCardSelectionChange: currentRound ? handleCardSelectionChange : undefined,
+    onRoundChange: room ? handleRoundChange : undefined,
+  });
 
   // Check if user is already a participant
   useEffect(() => {
@@ -45,15 +86,70 @@ export default function RoomPage() {
           if (selection) {
             setSelectedCard(selection.card_value);
           }
-        } else {
-          // Auto-start first round
-          const newRound = await startRound(room.id);
-          setCurrentRound(newRound);
+          
+          // Load all selections for revealed rounds
+          if (round.status === 'revealed') {
+            const allSelections = await getCardSelections(round.id);
+            setCardSelections(allSelections);
+          }
         }
+        // No auto-start - owner will start first round manually
       }
     }
     fetchRound();
   }, [room, participant]);
+
+  // Load card selections when round is revealed
+  useEffect(() => {
+    async function loadSelections() {
+      if (currentRound && currentRound.status === 'revealed') {
+        const allSelections = await getCardSelections(currentRound.id);
+        setCardSelections(allSelections);
+      }
+    }
+    loadSelections();
+  }, [currentRound?.status, currentRound?.id]);
+
+  // T052: Completion detection - check when selections change
+  useEffect(() => {
+    async function checkCompletion() {
+      if (!room || !currentRound || currentRound.status !== 'selecting') {
+        return;
+      }
+
+      try {
+        // Get active participant IDs
+        const activeParticipantIds = room.participants
+          ?.filter((p: any) => p.is_active)
+          .map((p: any) => p.id) || [];
+        
+        const result = await checkAllSelected(
+          currentRound.id,
+          activeParticipantIds
+        );
+        
+        if (result.allSelected) {
+          // FR-006: Auto-reveal when all users selected
+          await calculateStatistics(currentRound.id);
+          await updateRoundStatus(currentRound.id, 'revealed');
+          
+          // Load all selections for display
+          const allSelections = await getCardSelections(currentRound.id);
+          setCardSelections(allSelections);
+          
+          // Force refresh to show revealed state
+          if (refetchRoom) {
+            await refetchRoom();
+          }
+        }
+      } catch (error) {
+        console.error('Failed to check completion:', error);
+      }
+    }
+
+    checkCompletion();
+    // Check on room changes (triggered by Realtime card selections)
+  }, [room, currentRound]);
 
   // T032: Integrate display name input in RoomPage on first visit
   const handleJoinRoom = async (displayName: string) => {
@@ -76,18 +172,45 @@ export default function RoomPage() {
     }
   };
 
-  // T040: Handle card selection (implements FR-004, FR-005)
+  // T040: Handle card selection (implements FR-004) - one-time selection
   const handleCardSelect = async (cardValue: number) => {
-    if (!currentRound || !participant) return;
+    if (!currentRound || !participant || selectedCard !== null) return;
     
     try {
-      setSelecting(true);
       await selectCard(currentRound.id, participant.id, cardValue);
       setSelectedCard(cardValue); // SC-003: Immediate visual feedback
     } catch (err) {
       console.error('Failed to select card:', err);
-    } finally {
-      setSelecting(false);
+    }
+  };
+
+  // T059: Handle new round start (implements FR-014)
+  const handleStartNewRound = async () => {
+    if (!room) return;
+    
+    try {
+      // Start new round
+      const newRound = await startRound(room.id);
+      setCurrentRound(newRound);
+      
+      // T060: Reset card selection state
+      setSelectedCard(null);
+      setCardSelections([]);
+      
+      // Refresh room data
+      if (refetchRoom) {
+        await refetchRoom();
+      }
+    } catch (err) {
+      console.error('Failed to start new round:', err);
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+      
+      // User-friendly error message
+      if (errorMessage.includes('permission') || errorMessage.includes('policy')) {
+        alert('ラウンドを開始できませんでした。オーナー権限があるか確認してください。');
+      } else {
+        alert('ラウンドの開始に失敗しました。もう一度お試しください。');
+      }
     }
   };
 
@@ -124,34 +247,43 @@ export default function RoomPage() {
     );
   }
 
-  // T038: Integrate CardSelector component
+  // T038: Integrate CardSelector component / T056: Show ResultsView when revealed
   return (
     <Layout>
       <div style={{ padding: '20px' }}>
         <h2>Room: {room.code}</h2>
         <p>Welcome, {participant.display_name}!</p>
         
-        {currentRound && (
+        {!currentRound ? (
+          <WaitingRoom
+            participants={room.participants}
+            isOwner={participant.is_owner}
+            onStartGame={handleStartNewRound}
+          />
+        ) : (
           <div style={{ marginTop: '30px' }}>
             <h3>Round {currentRound.round_number}</h3>
-            <CardSelector 
-              selectedCard={selectedCard}
-              onSelect={handleCardSelect}
-              disabled={selecting || currentRound.status !== 'selecting'}
-            />
+            
+            {currentRound.status === 'selecting' ? (
+              <CardSelector 
+                selectedCard={selectedCard}
+                onSelect={handleCardSelect}
+                disabled={selectedCard !== null}
+              />
+            ) : (
+              <>
+                <ResultsView
+                  round={currentRound}
+                  participants={room.participants}
+                  selections={cardSelections}
+                />
+                {participant?.is_owner && (
+                  <NewRoundButton onStartNewRound={handleStartNewRound} />
+                )}
+              </>
+            )}
           </div>
         )}
-        
-        <div style={{ marginTop: '30px' }}>
-          <h3>Participants ({room.participants.length})</h3>
-          <ul>
-            {room.participants.map((p) => (
-              <li key={p.id}>
-                {p.display_name} {p.is_active ? '🟢' : '🔴'}
-              </li>
-            ))}
-          </ul>
-        </div>
       </div>
     </Layout>
   );

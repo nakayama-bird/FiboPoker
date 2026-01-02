@@ -11,6 +11,7 @@ interface Participant {
   session_id: string;
   display_name: string;
   is_active: boolean;
+  is_owner: boolean;
   created_at: string;
 }
 
@@ -57,6 +58,14 @@ export async function joinRoom({ roomId, displayName }: JoinRoomParams): Promise
     return data;
   }
 
+  // Check if this is the first participant (will be owner)
+  const { count } = await supabase
+    .from('participants')
+    .select('*', { count: 'exact', head: true })
+    .eq('room_id', roomId);
+
+  const isOwner = count === 0;
+
   // Insert new participant
   const { data, error } = await supabase
     .from('participants')
@@ -65,6 +74,7 @@ export async function joinRoom({ roomId, displayName }: JoinRoomParams): Promise
       session_id: user.id,
       display_name: displayName,
       is_active: true,
+      is_owner: isOwner,
     } as any)
     .select()
     .single();

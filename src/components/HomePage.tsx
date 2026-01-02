@@ -30,7 +30,7 @@ export default function HomePage() {
   return (
     <Layout>
       <div className={styles.container}>
-        <h1 className={styles.title}>Fibonacci Poker</h1>
+        <h1 className={styles.title}>FiboPoker</h1>
         <p className={styles.subtitle}>アジャイル開発のための見積もりツール</p>
         
         <button
