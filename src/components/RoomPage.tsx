@@ -12,6 +12,8 @@ import CardSelector from './CardSelector';
 import ResultsView from './ResultsView';
 import NewRoundButton from './NewRoundButton';
 import WaitingRoom from './WaitingRoom';
+import { InvitationLink } from './InvitationLink';
+import { ParticipantList } from './ParticipantList';
 
 // T037-T040, T048: RoomPage with card selection and realtime integration
 export default function RoomPage() {
@@ -25,6 +27,9 @@ export default function RoomPage() {
   const [currentRound, setCurrentRound] = useState<any>(null);
   const [selectedCard, setSelectedCard] = useState<number | null>(null);
   const [cardSelections, setCardSelections] = useState<any[]>([]);
+  
+  // Track which participants have selected cards
+  const [selectedParticipantIds, setSelectedParticipantIds] = useState<Set<string>>(new Set());
 
   // T048: Realtime callbacks
   const handleParticipantChange = useCallback(() => {
@@ -33,12 +38,19 @@ export default function RoomPage() {
     }
   }, [refetchRoom]);
 
-  const handleCardSelectionChange = useCallback(() => {
+  const handleCardSelectionChange = useCallback(async () => {
+    // Update selected participant IDs for real-time status
+    if (currentRound) {
+      const selections = await getCardSelections(currentRound.id);
+      const selectedIds = new Set(selections.map(s => s.participant_id));
+      setSelectedParticipantIds(selectedIds);
+    }
+    
     // Refetch room data (includes participants count updates)
     if (refetchRoom) {
       refetchRoom();
     }
-  }, [refetchRoom]);
+  }, [refetchRoom, currentRound]);
 
   const handleRoundChange = useCallback(async (payload: any) => {
     if (payload.eventType === 'INSERT' || payload.eventType === 'UPDATE') {
@@ -102,9 +114,17 @@ export default function RoomPage() {
   // Load card selections when round is revealed
   useEffect(() => {
     async function loadSelections() {
-      if (currentRound && currentRound.status === 'revealed') {
+      if (currentRound) {
         const allSelections = await getCardSelections(currentRound.id);
-        setCardSelections(allSelections);
+        
+        // Update card selections for revealed rounds
+        if (currentRound.status === 'revealed') {
+          setCardSelections(allSelections);
+        }
+        
+        // Update selected participant IDs for participant list
+        const selectedIds = new Set(allSelections.map(s => s.participant_id));
+        setSelectedParticipantIds(selectedIds);
       }
     }
     loadSelections();
@@ -255,34 +275,50 @@ export default function RoomPage() {
         <p>Welcome, {participant.display_name}!</p>
         
         {!currentRound ? (
-          <WaitingRoom
-            participants={room.participants}
-            isOwner={participant.is_owner}
-            onStartGame={handleStartNewRound}
-          />
+          <>
+            {participant?.is_owner && <InvitationLink roomCode={room.code} />}
+            <WaitingRoom
+              participants={room.participants}
+              isOwner={participant.is_owner}
+              onStartGame={handleStartNewRound}
+            />
+          </>
         ) : (
-          <div style={{ marginTop: '30px' }}>
-            <h3>Round {currentRound.round_number}</h3>
-            
-            {currentRound.status === 'selecting' ? (
-              <CardSelector 
-                selectedCard={selectedCard}
-                onSelect={handleCardSelect}
-                disabled={selectedCard !== null}
-              />
-            ) : (
-              <>
-                <ResultsView
-                  round={currentRound}
-                  participants={room.participants}
-                  selections={cardSelections}
+          <>
+            <div style={{ marginTop: '30px' }}>
+              <h3>Round {currentRound.round_number}</h3>
+              
+              {currentRound.status === 'selecting' ? (
+                <CardSelector 
+                  selectedCard={selectedCard}
+                  onSelect={handleCardSelect}
+                  disabled={selectedCard !== null}
                 />
-                {participant?.is_owner && (
-                  <NewRoundButton onStartNewRound={handleStartNewRound} />
-                )}
-              </>
-            )}
-          </div>
+              ) : (
+                <>
+                  <ResultsView
+                    round={currentRound}
+                    participants={room.participants}
+                    selections={cardSelections}
+                  />
+                  {participant?.is_owner && (
+                    <>
+                      <NewRoundButton onStartNewRound={handleStartNewRound} />
+                      <InvitationLink roomCode={room.code} />
+                    </>
+                  )}
+                </>
+              )}
+            </div>
+            
+            <div style={{ marginTop: '30px' }}>
+              <ParticipantList
+                participants={room.participants}
+                currentRoundId={currentRound.id}
+                selectedParticipantIds={selectedParticipantIds}
+              />
+            </div>
+          </>
         )}
       </div>
     </Layout>

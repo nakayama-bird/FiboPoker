@@ -11,6 +11,7 @@ interface Room {
     id: string;
     display_name: string;
     is_active: boolean;
+    is_owner: boolean;
   }>;
   rounds: Array<{
     id: string;
