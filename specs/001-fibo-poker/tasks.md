@@ -451,18 +451,82 @@ parallel ::: \
 
 ---
 
+## Phase 8: Security Improvements (Post-MVP)
+
+**Purpose**: セキュリティ強化（ポートフォリオ→本番移行時に実装）
+
+**⚠️ Note**: Phase 7完了時点では基本的なセキュリティのみ実装。本格運用前に以下を対応。
+
+### 🔴 最優先（本番運用には必須）
+
+- [ ] T106 [P] Implement Row Level Security for rooms table
+  - Policy: 参加者は自分が参加しているルームのみ読み取り可能
+  - Policy: ルーム作成者のみがルームを削除可能
+  - File: `supabase/migrations/002_security.sql`
+
+- [ ] T107 [P] Implement Row Level Security for participants table
+  - Policy: 自分が参加しているルームの参加者情報のみ読み取り可能
+  - Policy: 自分自身のレコードのみ更新・削除可能
+  - File: `supabase/migrations/002_security.sql`
+
+- [ ] T108 [P] Implement Row Level Security for rounds table
+  - Policy: 自分が参加しているルームのラウンドのみ読み取り可能
+  - Policy: ルームオーナーのみがラウンドを作成・更新可能
+  - File: `supabase/migrations/002_security.sql`
+
+- [ ] T109 [P] Implement Row Level Security for selections table
+  - Policy: 自分が参加しているルームの選択のみ読み取り可能
+  - Policy: 自分自身の選択のみ作成・更新・削除可能
+  - File: `supabase/migrations/002_security.sql`
+
+- [ ] T110 Integrate Supabase Auth (Anonymous Authentication)
+  - 匿名認証を有効化してセッション管理を改善
+  - File: `src/services/supabase.ts`
+  - File: `src/services/api.ts` (auth.signInAnonymously()を追加)
+
+- [ ] T111 Update participant creation to use auth.uid()
+  - localStorage依存からauth.uid()に移行
+  - File: `src/services/api.ts` (createParticipant)
+  - File: `src/hooks/useParticipant.ts` (セッション管理ロジック)
+
+- [ ] T112 Test RLS policies with multiple users
+  - 他人のルームにアクセスできないことを確認
+  - 自分の選択のみ操作可能なことを確認
+  - Manual testing: 複数ブラウザでテスト
+
+### 🟡 推奨（セキュリティ向上）
+
+- [ ] T113 [P] Add database constraints for input validation
+  - display_name: 1-20文字制限
+  - card_value: 1,2,3,5,8,13,21のみ許可（ENUM化）
+  - File: `supabase/migrations/003_validation.sql`
+
+- [ ] T114 [P] Implement CORS restrictions in Supabase
+  - 許可オリジンを `fibopoker.pages.dev` のみに制限
+  - Supabase Dashboard: Settings > API > CORS
+
+- [ ] T115 Add rate limiting with Cloudflare Workers (optional)
+  - ルーム作成: 1分あたり5回まで
+  - カード選択: 10秒あたり10回まで
+  - File: `cloudflare-workers/rate-limit.ts`
+
+---
+
 ## Summary
 
-- **Total Tasks**: 105
+- **Total Tasks**: 115 (+ 10 security tasks)
 - **User Story 1 (P1)**: 20 tasks (T024-T043) - MVP
 - **User Story 2 (P2)**: 20 tasks (T044-T063)
 - **User Story 3 (P3)**: 14 tasks (T064-T077)
 - **Setup + Foundational**: 23 tasks (T001-T023)
 - **Edge Cases**: 11 tasks (T078-T088)
-- **Polish**: 17 tasks (T089-T105)
+- **Polish (Phase 7)**: 17 tasks (T089-T105)
+- **Security (Phase 8)**: 10 tasks (T106-T115)
 
-**Parallel Opportunities**: 47 tasks marked [P] can run in parallel within their phases
+**Parallel Opportunities**: 52 tasks marked [P] can run in parallel within their phases
 
 **Suggested MVP Scope**: Phase 1 + Phase 2 + Phase 3 (User Story 1) = 43 tasks
+
+**Production Ready Scope**: MVP + Phase 4-7 + Phase 8 (最優先のみ) = 103 tasks
 
 **Constitution Compliance**: ✅ All tasks align with 7 constitution principles validated in [plan.md](plan.md)
