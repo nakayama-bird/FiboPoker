@@ -11,6 +11,7 @@ import DisplayNameInput from './DisplayNameInput';
 import CardSelector from './CardSelector';
 import ResultsView from './ResultsView';
 import NewRoundButton from './NewRoundButton';
+import WaitingRoom from './WaitingRoom';
 
 // T037-T040, T048: RoomPage with card selection and realtime integration
 export default function RoomPage() {
@@ -91,11 +92,8 @@ export default function RoomPage() {
             const allSelections = await getCardSelections(round.id);
             setCardSelections(allSelections);
           }
-        } else {
-          // Auto-start first round
-          const newRound = await startRound(room.id);
-          setCurrentRound(newRound);
         }
+        // No auto-start - owner will start first round manually
       }
     }
     fetchRound();
@@ -205,6 +203,14 @@ export default function RoomPage() {
       }
     } catch (err) {
       console.error('Failed to start new round:', err);
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+      
+      // User-friendly error message
+      if (errorMessage.includes('permission') || errorMessage.includes('policy')) {
+        alert('ラウンドを開始できませんでした。オーナー権限があるか確認してください。');
+      } else {
+        alert('ラウンドの開始に失敗しました。もう一度お試しください。');
+      }
     }
   };
 
@@ -248,7 +254,13 @@ export default function RoomPage() {
         <h2>Room: {room.code}</h2>
         <p>Welcome, {participant.display_name}!</p>
         
-        {currentRound && (
+        {!currentRound ? (
+          <WaitingRoom
+            participants={room.participants}
+            isOwner={participant.is_owner}
+            onStartGame={handleStartNewRound}
+          />
+        ) : (
           <div style={{ marginTop: '30px' }}>
             <h3>Round {currentRound.round_number}</h3>
             
@@ -265,7 +277,9 @@ export default function RoomPage() {
                   participants={room.participants}
                   selections={cardSelections}
                 />
-                <NewRoundButton onStartNewRound={handleStartNewRound} />
+                {participant?.is_owner && (
+                  <NewRoundButton onStartNewRound={handleStartNewRound} />
+                )}
               </>
             )}
           </div>
