@@ -59,7 +59,7 @@ export function subscribeToRounds(
   callback: RoundCallback
 ): RealtimeChannel {
   const channel = supabase
-    .channel(`rounds:${roomId}`)
+    .channel(`room:${roomId}:rounds`)
     .on(
       'postgres_changes',
       {

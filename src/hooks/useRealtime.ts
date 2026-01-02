@@ -12,7 +12,7 @@ interface UseRealtimeProps {
   roundId?: string;
   onParticipantChange?: () => void;
   onCardSelectionChange?: () => void;
-  onRoundChange?: () => void;
+  onRoundChange?: (payload: any) => void;
 }
 
 // T047: useRealtime() custom hook for realtime subscriptions
@@ -44,8 +44,8 @@ export function useRealtime({
 
     // Subscribe to rounds
     if (onRoundChange) {
-      const roundChannel = subscribeToRounds(roomId, () => {
-        onRoundChange();
+      const roundChannel = subscribeToRounds(roomId, (payload) => {
+        onRoundChange(payload);
       });
       channels.push(roundChannel);
     }
@@ -56,5 +56,6 @@ export function useRealtime({
         unsubscribeChannel(channel);
       });
     };
-  }, [roomId, roundId, onParticipantChange, onCardSelectionChange, onRoundChange]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [roomId, roundId]);
 }

@@ -10,6 +10,7 @@ import Layout from './Layout';
 import DisplayNameInput from './DisplayNameInput';
 import CardSelector from './CardSelector';
 import ResultsView from './ResultsView';
+import NewRoundButton from './NewRoundButton';
 
 // T037-T040, T048: RoomPage with card selection and realtime integration
 export default function RoomPage() {
@@ -38,15 +39,18 @@ export default function RoomPage() {
     }
   }, [refetchRoom]);
 
-  const handleRoundChange = useCallback(async () => {
-    if (room) {
-      const round = await getCurrentRound(room.id);
-      setCurrentRound(round);
+  const handleRoundChange = useCallback(async (payload: any) => {
+    if (payload.eventType === 'INSERT' || payload.eventType === 'UPDATE') {
+      const newRound = payload.new;
+      setCurrentRound(newRound);
+      
+      // Reset selected card and selections when new round starts
+      if (payload.eventType === 'INSERT') {
+        setSelectedCard(null);
+        setCardSelections([]);
+      }
     }
-    if (refetchRoom) {
-      refetchRoom();
-    }
-  }, [refetchRoom, room]);
+  }, []);
 
   // T048: Setup realtime subscriptions
   useRealtime({
@@ -182,6 +186,28 @@ export default function RoomPage() {
     }
   };
 
+  // T059: Handle new round start (implements FR-014)
+  const handleStartNewRound = async () => {
+    if (!room) return;
+    
+    try {
+      // Start new round
+      const newRound = await startRound(room.id);
+      setCurrentRound(newRound);
+      
+      // T060: Reset card selection state
+      setSelectedCard(null);
+      setCardSelections([]);
+      
+      // Refresh room data
+      if (refetchRoom) {
+        await refetchRoom();
+      }
+    } catch (err) {
+      console.error('Failed to start new round:', err);
+    }
+  };
+
   if (roomLoading) {
     return (
       <Layout>
@@ -233,11 +259,14 @@ export default function RoomPage() {
                 disabled={selectedCard !== null}
               />
             ) : (
-              <ResultsView
-                round={currentRound}
-                participants={room.participants}
-                selections={cardSelections}
-              />
+              <>
+                <ResultsView
+                  round={currentRound}
+                  participants={room.participants}
+                  selections={cardSelections}
+                />
+                <NewRoundButton onStartNewRound={handleStartNewRound} />
+              </>
             )}
           </div>
         )}

@@ -139,9 +139,9 @@ description: "Task list for Fibonacci Poker implementation"
 
 ### New Round for US2
 
-- [ ] T058 [P] [US2] Create "Start New Round" button component in src/components/NewRoundButton.tsx
-- [ ] T059 [US2] Implement new round flow: button → roundService.startRound() → reset UI to selecting state (implements FR-014)
-- [ ] T060 [US2] Clear previous card selections on new round start
+- [X] T058 [P] [US2] Create "Start New Round" button component in src/components/NewRoundButton.tsx
+- [X] T059 [US2] Implement new round flow: button → roundService.startRound() → reset UI to selecting state (implements FR-014)
+- [X] T060 [US2] Clear previous card selections on new round start
 
 ### Styling for US2
 
