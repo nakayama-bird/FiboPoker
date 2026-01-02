@@ -161,29 +161,29 @@ description: "Task list for Fibonacci Poker implementation"
 
 ### Invitation Link for US3
 
-- [ ] T064 [P] [US3] Create InvitationLink component with copy-to-clipboard in src/components/InvitationLink.tsx (implements FR-010)
-- [ ] T065 [P] [US3] Add share button UI with copy confirmation toast
-- [ ] T066 [US3] Integrate InvitationLink into RoomPage header
-- [ ] T067 [US3] Implement URL generation: window.location.origin + /room/:code
+- [X] T064 [P] [US3] Create InvitationLink component with copy-to-clipboard in src/components/InvitationLink.tsx (implements FR-010)
+- [X] T065 [P] [US3] Add share button UI with copy confirmation toast
+- [X] T066 [US3] Integrate InvitationLink into RoomPage header
+- [X] T067 [US3] Implement URL generation: window.location.origin + /room/:code
 
 ### Participant List for US3
 
-- [ ] T068 [P] [US3] Create ParticipantList component in src/components/ParticipantList.tsx (implements FR-012)
-- [ ] T069 [P] [US3] Display participant display_name and is_active status
-- [ ] T070 [P] [US3] Show "選択済み" indicator for participants who have selected cards (implements FR-013)
-- [ ] T071 [US3] Integrate ParticipantList into RoomPage sidebar
-- [ ] T072 [US3] Subscribe to participants table Realtime updates for live participant list
+- [X] T068 [P] [US3] Create ParticipantList component in src/components/ParticipantList.tsx (implements FR-012)
+- [X] T069 [P] [US3] Display participant display_name and is_active status
+- [X] T070 [P] [US3] Show "選択済み" indicator for participants who have selected cards (implements FR-013)
+- [X] T071 [US3] Integrate ParticipantList into RoomPage sidebar
+- [X] T072 [US3] Subscribe to participants table Realtime updates for live participant list
 
 ### Multi-User Synchronization for US3
 
-- [ ] T073 [US3] Ensure card selection status updates in real-time for all participants (SC-002)
-- [ ] T074 [US3] Test multi-user scenario: 2+ users selecting cards simultaneously
-- [ ] T075 [US3] Validate completion detection works with multiple participants
+- [X] T073 [US3] Ensure card selection status updates in real-time for all participants (SC-002)
+- [X] T074 [US3] Test multi-user scenario: 2+ users selecting cards simultaneously
+- [X] T075 [US3] Validate completion detection works with multiple participants
 
 ### Styling for US3
 
-- [ ] T076 [P] [US3] Create CSS Module for InvitationLink in src/styles/InvitationLink.module.css
-- [ ] T077 [P] [US3] Create CSS Module for ParticipantList in src/styles/ParticipantList.module.css
+- [X] T076 [P] [US3] Create CSS Module for InvitationLink in src/styles/InvitationLink.module.css
+- [X] T077 [P] [US3] Create CSS Module for ParticipantList in src/styles/ParticipantList.module.css
 
 **Checkpoint**: すべてのユーザーストーリーが独立して機能します
 

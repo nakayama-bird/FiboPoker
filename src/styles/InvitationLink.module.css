@@ -1,0 +1,115 @@
+.container {
+  margin-bottom: var(--spacing-lg, 1.5rem);
+}
+
+.linkWrapper {
+  display: flex;
+  gap: var(--spacing-sm, 0.5rem);
+  align-items: stretch;
+}
+
+.linkInput {
+  flex: 1;
+  padding: var(--spacing-sm, 0.5rem) var(--spacing-md, 1rem);
+  font-size: var(--font-size-base, 1rem);
+  font-family: 'Courier New', monospace;
+  border: 2px solid var(--color-border, #dee2e6);
+  border-radius: var(--border-radius-md, 8px);
+  background-color: var(--color-bg-secondary, #f8f9fa);
+  color: var(--color-text, #212529);
+  cursor: pointer;
+  transition: all var(--transition-fast, 0.15s);
+}
+
+.linkInput:hover {
+  border-color: var(--color-primary, #0d6efd);
+  background-color: white;
+}
+
+.linkInput:focus {
+  outline: none;
+  border-color: var(--color-primary, #0d6efd);
+  background-color: white;
+  box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.1);
+}
+
+.copyButton {
+  padding: var(--spacing-sm, 0.5rem) var(--spacing-lg, 1.5rem);
+  font-size: var(--font-size-base, 1rem);
+  font-weight: var(--font-weight-medium, 500);
+  color: white;
+  background-color: var(--color-primary, #0d6efd);
+  border: none;
+  border-radius: var(--border-radius-md, 8px);
+  cursor: pointer;
+  transition: all var(--transition-fast, 0.15s);
+  white-space: nowrap;
+}
+
+.copyButton:hover {
+  background-color: #0b5ed7;
+  transform: translateY(-1px);
+  box-shadow: var(--box-shadow-md, 0 4px 6px rgba(0, 0, 0, 0.1));
+}
+
+.copyButton:active {
+  transform: translateY(0);
+}
+
+.copyButton:disabled {
+  background-color: var(--color-border, #dee2e6);
+  cursor: not-allowed;
+  transform: none;
+}
+
+.toast {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  padding: var(--spacing-md, 1rem) var(--spacing-lg, 1.5rem);
+  background-color: var(--color-success, #28a745);
+  color: white;
+  border-radius: var(--border-radius-md, 8px);
+  box-shadow: var(--box-shadow-lg, 0 8px 16px rgba(0, 0, 0, 0.2));
+  font-weight: var(--font-weight-medium, 500);
+  z-index: 1000;
+  animation: slideIn 0.3s ease-out, fadeOut 0.3s ease-in 1.7s;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .linkWrapper {
+    flex-direction: column;
+  }
+
+  .copyButton {
+    width: 100%;
+  }
+
+  .toast {
+    top: 10px;
+    right: 10px;
+    left: 10px;
+    text-align: center;
+  }
+}
