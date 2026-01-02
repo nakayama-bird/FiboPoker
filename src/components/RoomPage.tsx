@@ -284,17 +284,6 @@ export default function RoomPage() {
             )}
           </div>
         )}
-        
-        <div style={{ marginTop: '30px' }}>
-          <h3>Participants ({room.participants.length})</h3>
-          <ul>
-            {room.participants.map((p) => (
-              <li key={p.id}>
-                {p.display_name} {p.is_active ? '🟢' : '🔴'}
-              </li>
-            ))}
-          </ul>
-        </div>
       </div>
     </Layout>
   );
