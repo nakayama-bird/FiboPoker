@@ -208,10 +208,10 @@ description: "Task list for Fibonacci Poker implementation"
 - [x] T085 [P] Handle participant leaving before reveal: recalculate statistics (Edge Case 5)
 - [x] T086 Handle room creator leaving: room continues for remaining participants (Edge Case 6)
 
-### Auto-Deletion
+### Auto-Deletion (後回し可)
 
-- [ ] T087 Verify pg_cron job executes cleanup_inactive_rooms() every 5 minutes
-- [ ] T088 Test auto-deletion: room deleted 30 minutes after all participants leave (implements FR-017, SC-008)
+- [ ] T087 Verify pg_cron job executes cleanup_inactive_rooms() every 5 minutes (後回し: 手動削除で運用可能)
+- [ ] T088 Test auto-deletion: room deleted 30 minutes after all participants leave (implements FR-017, SC-008) (後回し: 手動削除で運用可能)
 
 ---
 
@@ -219,34 +219,42 @@ description: "Task list for Fibonacci Poker implementation"
 
 **Purpose**: 複数のユーザーストーリーに影響する改善
 
-### Performance Optimization
+### 🔴 Priority 1: リリース必須タスク (9 tasks)
 
-- [ ] T089 [P] Optimize Vite build for production: code splitting, minification
-- [ ] T090 [P] Implement optimistic UI updates for card selection (SC-003: 300ms)
-- [ ] T091 Validate initial load time < 2 seconds (Performance Goal)
-- [ ] T092 Validate realtime update delivery < 1 second (SC-002)
+#### User Experience (リリース前必須)
+- [x] T093 [P] Add loading states for all async operations (必須: UX改善)
+- [x] T094 [P] Add error handling with user-friendly messages (必須: UX改善)
 
-### User Experience
+#### Documentation (リリース前必須)
+- [x] T097 [P] Create README.md with project setup instructions (必須: ポートフォリオに必要)
+- [x] T098 [P] Document environment variables in .env.example (必須: セットアップに必要)
 
-- [ ] T093 [P] Add loading states for all async operations
-- [ ] T094 [P] Add error handling with user-friendly messages
-- [ ] T095 [P] Implement accessibility: ARIA labels, keyboard navigation
-- [ ] T096 Validate 90% of users complete room creation without instruction (SC-007)
+#### Deployment (リリース前必須)
+- [ ] T100 Configure Cloudflare Pages: connect GitHub repo, set build command (必須)
+- [ ] T101 Add Supabase environment variables to Cloudflare Pages settings (必須)
+- [ ] T102 Deploy to production and verify all features work (必須)
 
-### Documentation & Deployment
+#### Validation (リリース前必須)
+- [ ] T103 Run all scenarios from [quickstart.md](quickstart.md) (必須: バグ発見)
+- [ ] T104 Validate all Success Criteria (SC-001 through SC-008) (必須: 品質保証)
 
-- [ ] T097 [P] Create README.md with project setup instructions
-- [ ] T098 [P] Document environment variables in .env.example
-- [ ] T099 [P] Create deployment guide for Cloudflare Pages in docs/deployment.md
-- [ ] T100 Configure Cloudflare Pages: connect GitHub repo, set build command
-- [ ] T101 Add Supabase environment variables to Cloudflare Pages settings
-- [ ] T102 Deploy to production and verify all features work
+### 🟡 Priority 2: 後回し可能タスク (8 tasks)
 
-### Validation
+#### Performance Optimization (後回し可)
+- [ ] T089 [P] Optimize Vite build for production: code splitting, minification (後回し: 現状でも十分速い)
+- [ ] T090 [P] Implement optimistic UI updates for card selection (SC-003: 300ms) (後回し: UX向上だが必須ではない)
+- [ ] T091 Validate initial load time < 2 seconds (Performance Goal) (後回し: 現状問題なし)
+- [ ] T092 Validate realtime update delivery < 1 second (SC-002) (後回し: 現状問題なし)
 
-- [ ] T103 Run all scenarios from [quickstart.md](quickstart.md)
-- [ ] T104 Validate all Success Criteria (SC-001 through SC-008)
-- [ ] T105 Validate all Functional Requirements (FR-001 through FR-017)
+#### Accessibility (後回し可)
+- [ ] T095 [P] Implement accessibility: ARIA labels, keyboard navigation (後回し: 重要だが初回リリースには不要)
+
+#### Documentation (後回し可)
+- [ ] T099 [P] Create deployment guide for Cloudflare Pages in docs/deployment.md (後回し: 自分用なら不要)
+
+#### Validation (後回し可)
+- [ ] T096 Validate 90% of users complete room creation without instruction (SC-007) (後回し: 実ユーザーで確認)
+- [ ] T105 Validate all Functional Requirements (FR-001 through FR-017) (後回し: T103でカバー)
 
 ---
 
