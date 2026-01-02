@@ -32,6 +32,10 @@ export default function RoomPage() {
   
   // Track which participants have selected cards
   const [selectedParticipantIds, setSelectedParticipantIds] = useState<Set<string>>(new Set());
+  
+  // T093: Loading states for async operations
+  const [selectingCard, setSelectingCard] = useState(false);
+  const [startingRound, setStartingRound] = useState(false);
 
   // T080: Restore room state on reconnection
   useEffect(() => {
@@ -241,20 +245,25 @@ export default function RoomPage() {
 
   // T040: Handle card selection (implements FR-004) - one-time selection
   const handleCardSelect = async (cardValue: number) => {
-    if (!currentRound || !participant || selectedCard !== null) return;
+    if (!currentRound || !participant || selectedCard !== null || selectingCard) return;
     
+    setSelectingCard(true);
     try {
       await selectCard(currentRound.id, participant.id, cardValue);
       setSelectedCard(cardValue); // SC-003: Immediate visual feedback
     } catch (err) {
       console.error('Failed to select card:', err);
+      alert('カードの選択に失敗しました。もう一度お試しください。');
+    } finally {
+      setSelectingCard(false);
     }
   };
 
   // T059: Handle new round start (implements FR-014)
   const handleStartNewRound = async () => {
-    if (!room) return;
+    if (!room || startingRound) return;
     
+    setStartingRound(true);
     try {
       // Start new round
       const newRound = await startRound(room.id);
@@ -278,6 +287,8 @@ export default function RoomPage() {
       } else {
         alert('ラウンドの開始に失敗しました。もう一度お試しください。');
       }
+    } finally {
+      setStartingRound(false);
     }
   };
 
@@ -341,6 +352,7 @@ export default function RoomPage() {
                   selectedCard={selectedCard}
                   onSelect={handleCardSelect}
                   disabled={selectedCard !== null}
+                  loading={selectingCard}
                 />
               ) : (
                 <>

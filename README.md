@@ -1,73 +1,135 @@
-# React + TypeScript + Vite
+# FiboPoker
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+リアルタイム協調型フィボナッチポーカーアプリケーション
 
-Currently, two official plugins are available:
+## 概要
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+FiboPokerは、アジャイル開発のプランニングポーカーをオンラインで実施できるWebアプリケーションです。
+複数のメンバーが同時にカードを選択し、リアルタイムで結果を共有できます。
 
-## React Compiler
+### 主な機能
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- 🎴 **フィボナッチカード選択**: 1, 2, 3, 5, 8, 13, 21のカードから選択
+- 👥 **リアルタイム同期**: 参加者の選択状態をリアルタイムで表示
+- 📊 **統計表示**: 最大値、最小値、中央値、平均値を自動計算
+- 🔄 **自動集計**: 全員が選択完了で自動的に結果を表示
+- 🔗 **簡単参加**: URLを共有するだけで参加可能
+- 📱 **レスポンシブ対応**: PC・タブレット・スマートフォンで利用可能
+- 🔌 **再接続対応**: ネットワーク切断時の自動再接続機能
 
-## Expanding the ESLint configuration
+## 技術スタック
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+- **Frontend**: React 19 + TypeScript + Vite
+- **Backend**: Supabase (PostgreSQL + Realtime)
+- **Styling**: CSS Modules
+- **Deployment**: Cloudflare Pages
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## セットアップ
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+### 前提条件
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+- Node.js 18以上
+- npm または yarn
+- Supabaseアカウント
+
+### 1. リポジトリのクローン
+
+```bash
+git clone https://github.com/nakayama-bird/FiboPoker.git
+cd FiboPoker
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### 2. 依存関係のインストール
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm install
 ```
+
+### 3. Supabaseのセットアップ
+
+1. [Supabase](https://supabase.com/)でプロジェクトを作成
+2. SQL Editorで `supabase/migrations/001_initial_schema.sql` を実行
+3. Settings > API から以下の情報を取得：
+   - Project URL
+   - anon/public API key
+
+### 4. 環境変数の設定
+
+`.env.example` をコピーして `.env` を作成：
+
+```bash
+cp .env.example .env
+```
+
+`.env` ファイルを編集してSupabaseの情報を設定：
+
+```env
+VITE_SUPABASE_URL=your_supabase_project_url
+VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+```
+
+### 5. 開発サーバーの起動
+
+```bash
+npm run dev
+```
+
+ブラウザで http://localhost:5173 にアクセス
+
+### 6. ビルド
+
+```bash
+npm run build
+```
+
+## 使い方
+
+### ルームの作成
+
+1. トップページで「新しいルームを作成」をクリック
+2. 表示名を入力して参加
+3. 招待URLを他の参加者に共有
+
+### カードの選択
+
+1. 待機室で「ラウンドを開始」をクリック（オーナーのみ）
+2. フィボナッチカードから1枚選択
+3. 全員が選択完了すると自動的に結果が表示される
+
+### 新しいラウンド
+
+結果画面で「新しいラウンドを開始」をクリック（オーナーのみ）
+
+## プロジェクト構成
+
+```
+FiboPoker/
+├── src/
+│   ├── components/       # Reactコンポーネント
+│   ├── hooks/            # カスタムフック
+│   ├── services/         # Supabase API呼び出し
+│   ├── types/            # TypeScript型定義
+│   └── styles/           # グローバルスタイル
+├── supabase/
+│   └── migrations/       # データベースマイグレーション
+├── specs/                # 仕様書・タスク管理
+└── docs/                 # ドキュメント
+```
+
+## 開発
+
+### コマンド
+
+- `npm run dev` - 開発サーバー起動
+- `npm run build` - プロダクションビルド
+- `npm run preview` - ビルド結果のプレビュー
+- `npm run lint` - ESLintによるコードチェック
+
+### ブランチ戦略
+
+- `master` - 本番環境
+- `feature/*` - 機能開発
+
+## ライセンス
+
+MIT
