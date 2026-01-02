@@ -195,18 +195,18 @@ description: "Task list for Fibonacci Poker implementation"
 
 ### Reconnection Logic
 
-- [ ] T078 [P] Implement Supabase automatic reconnection handling (implements FR-015)
-- [ ] T079 [P] Create reconnection indicator component in src/components/ReconnectionIndicator.tsx
-- [ ] T080 Restore room state on reconnection: fetch current round + selections (implements FR-016)
-- [ ] T081 Validate reconnection within 60 seconds restores user state (SC-006)
+- [x] T078 [P] Implement Supabase automatic reconnection handling (implements FR-015)
+- [x] T079 [P] Create reconnection indicator component in src/components/ReconnectionIndicator.tsx
+- [x] T080 Restore room state on reconnection: fetch current round + selections (implements FR-016)
+- [x] T081 Validate reconnection within 60 seconds restores user state (SC-006)
 
 ### Edge Case Handling
 
-- [ ] T082 [P] Handle single participant scenario: display statistics when only 1 user (Edge Case 1)
-- [ ] T083 [P] Handle unanimous selection: highlight when all cards are the same (Edge Case 2)
-- [ ] T084 [P] Handle even participant count: calculate median correctly (Edge Case 3)
-- [ ] T085 [P] Handle participant leaving before reveal: recalculate statistics (Edge Case 5)
-- [ ] T086 Handle room creator leaving: room continues for remaining participants (Edge Case 6)
+- [x] T082 [P] Handle single participant scenario: display statistics when only 1 user (Edge Case 1)
+- [x] T083 [P] Handle unanimous selection: highlight when all cards are the same (Edge Case 2)
+- [x] T084 [P] Handle even participant count: calculate median correctly (Edge Case 3)
+- [x] T085 [P] Handle participant leaving before reveal: recalculate statistics (Edge Case 5)
+- [x] T086 Handle room creator leaving: room continues for remaining participants (Edge Case 6)
 
 ### Auto-Deletion
 
