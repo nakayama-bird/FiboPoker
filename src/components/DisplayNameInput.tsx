@@ -19,19 +19,19 @@ export default function DisplayNameInput({ onSubmit, loading = false }: DisplayN
 
   return (
     <div className={styles.container}>
-      <h2 className={styles.title}>Join Room</h2>
+      <h2 className={styles.title}>ルームに参加</h2>
       
       <form onSubmit={handleSubmit} className={styles.form}>
         <div className={styles.inputGroup}>
           <label htmlFor="displayName" className={styles.label}>
-            Display Name
+            表示名
           </label>
           <input
             type="text"
             id="displayName"
             value={displayName}
             onChange={(e) => setDisplayName(e.target.value)}
-            placeholder="Enter your name"
+            placeholder="名前を入力してください"
             maxLength={50}
             required
             disabled={loading}
@@ -44,7 +44,7 @@ export default function DisplayNameInput({ onSubmit, loading = false }: DisplayN
           disabled={loading || !displayName.trim()}
           className={styles.submitButton}
         >
-          {loading ? 'Joining...' : 'Join Room'}
+          {loading ? '参加中...' : '参加する'}
         </button>
       </form>
     </div>

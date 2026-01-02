@@ -27,25 +27,25 @@ export default function StatisticsDisplay({
   return (
     <div className={`${styles.container} ${isUnanimous ? styles.unanimous : ''}`}>
       <h3 className={styles.title}>
-        統計情報
+        結果
         {isUnanimous && <span className={styles.unanimousBadge}>✨ 全員一致</span>}
         {isSingleParticipant && <span className={styles.singleBadge}>👤 1人のみ</span>}
       </h3>
       <div className={styles.stats}>
         <div className={styles.statItem}>
-          <span className={styles.label}>最大値</span>
+          <span className={styles.label}>最大</span>
           <span className={styles.value}>{maxValue ?? '-'}</span>
         </div>
         <div className={styles.statItem}>
-          <span className={styles.label}>最小値</span>
+          <span className={styles.label}>最小</span>
           <span className={styles.value}>{minValue ?? '-'}</span>
         </div>
         <div className={styles.statItem}>
-          <span className={styles.label}>中央値</span>
+          <span className={styles.label}>中央</span>
           <span className={styles.value}>{medianValue ?? '-'}</span>
         </div>
         <div className={styles.statItem}>
-          <span className={styles.label}>平均値</span>
+          <span className={styles.label}>平均</span>
           <span className={styles.value}>{avgValue?.toFixed(1) ?? '-'}</span>
         </div>
       </div>

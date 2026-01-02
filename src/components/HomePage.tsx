@@ -38,7 +38,7 @@ export default function HomePage() {
           disabled={loading}
           className={styles.createButton}
         >
-          {loading ? 'Creating...' : 'Create Room'}
+          {loading ? '作成中...' : '新しいルームを作成'}
         </button>
         
         {error && (

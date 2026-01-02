@@ -330,8 +330,32 @@ export default function RoomPage() {
     <Layout>
       <ReconnectionIndicator />
       <div style={{ padding: '20px' }}>
-        <h2>Room: {room.code}</h2>
-        <p>Welcome, {participant.display_name}!</p>
+        {currentRound && (
+          <h1 style={{ 
+            fontSize: '32px', 
+            margin: '0 0 10px 0',
+            fontWeight: 'bold'
+          }}>
+            Round {currentRound.round_number}
+          </h1>
+        )}
+        
+        <div style={{ marginBottom: '20px' }}>
+          <p style={{ 
+            margin: '0 0 5px 0',
+            fontSize: '14px',
+            color: '#666'
+          }}>
+            Room: {room.code}
+          </p>
+          <p style={{ 
+            margin: 0,
+            fontSize: '14px',
+            color: '#666'
+          }}>
+            あなた: {participant.display_name}
+          </p>
+        </div>
         
         {!currentRound ? (
           <>
@@ -344,8 +368,7 @@ export default function RoomPage() {
           </>
         ) : (
           <>
-            <div style={{ marginTop: '30px' }}>
-              <h3>Round {currentRound.round_number}</h3>
+            <div style={{ marginTop: '20px' }}>
               
               {currentRound.status === 'selecting' ? (
                 <CardSelector 

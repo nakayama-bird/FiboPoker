@@ -1,5 +1,9 @@
 # FiboPoker
 
+<div align="center">
+  <img src="docs/logo.png" alt="FiboPoker Logo" width="400">
+</div>
+
 リアルタイム協調型フィボナッチポーカーアプリケーション
 
 ## 🚀 デモ
