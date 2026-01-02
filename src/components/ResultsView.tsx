@@ -29,11 +29,15 @@ interface ResultsViewProps {
 }
 
 // T053: ResultsView component (implements FR-009)
+// T082: Pass participant count for single participant scenario
 export default function ResultsView({
   round,
   participants,
   selections,
 }: ResultsViewProps) {
+  // T082, T085: Count active participants who made selections
+  const activeParticipantCount = selections.length;
+  
   return (
     <div className={styles.container}>
       <div className={styles.header}>
@@ -45,6 +49,7 @@ export default function ResultsView({
         minValue={round.min_value}
         medianValue={round.median_value}
         avgValue={round.avg_value}
+        participantCount={activeParticipantCount}
       />
 
       <ParticipantCards participants={participants} selections={selections} />

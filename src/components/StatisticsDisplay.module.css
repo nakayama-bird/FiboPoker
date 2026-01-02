@@ -3,6 +3,14 @@
   border-radius: 8px;
   padding: 20px;
   margin: 20px 0;
+  transition: all 0.3s ease;
+}
+
+/* T083: Unanimous selection highlight */
+.container.unanimous {
+  background: linear-gradient(135deg, #ffeaa7 0%, #fdcb6e 100%);
+  box-shadow: 0 4px 12px rgba(253, 203, 110, 0.4);
+  border: 2px solid #fdcb6e;
 }
 
 .title {
@@ -10,6 +18,38 @@
   font-size: 18px;
   font-weight: 600;
   color: #212529;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.unanimousBadge {
+  font-size: 14px;
+  font-weight: 500;
+  color: #856404;
+  background-color: rgba(255, 255, 255, 0.7);
+  padding: 4px 12px;
+  border-radius: 12px;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+/* T082: Single participant badge */
+.singleBadge {
+  font-size: 14px;
+  font-weight: 500;
+  color: #004085;
+  background-color: #cce5ff;
+  padding: 4px 12px;
+  border-radius: 12px;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
 }
 
 .stats {

@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { useRoom } from '../hooks/useRoom';
 import { useRealtime } from '../hooks/useRealtime';
+import { connectionMonitor } from '../services/supabase';
 import { joinRoom, getCurrentParticipant } from '../services/participantService';
 import { startRound, getCurrentRound, calculateStatistics, updateRoundStatus } from '../services/roundService';
 import { selectCard, getCardSelection, getCardSelections } from '../services/cardSelectionService';
@@ -14,6 +15,7 @@ import NewRoundButton from './NewRoundButton';
 import WaitingRoom from './WaitingRoom';
 import { InvitationLink } from './InvitationLink';
 import { ParticipantList } from './ParticipantList';
+import { ReconnectionIndicator } from './ReconnectionIndicator';
 
 // T037-T040, T048: RoomPage with card selection and realtime integration
 export default function RoomPage() {
@@ -30,6 +32,51 @@ export default function RoomPage() {
   
   // Track which participants have selected cards
   const [selectedParticipantIds, setSelectedParticipantIds] = useState<Set<string>>(new Set());
+
+  // T080: Restore room state on reconnection
+  useEffect(() => {
+    const restoreRoomState = async () => {
+      if (!room || !participant || !refetchRoom) return;
+
+      try {
+        // Refetch room data
+        await refetchRoom();
+
+        // Reload current round and selections
+        const round = await getCurrentRound(room.id);
+        if (round) {
+          setCurrentRound(round);
+          
+          // Restore user's card selection
+          const selection = await getCardSelection(round.id, participant.id);
+          if (selection) {
+            setSelectedCard(selection.card_value);
+          }
+          
+          // Reload all selections
+          const allSelections = await getCardSelections(round.id);
+          const selectedIds = new Set(allSelections.map(s => s.participant_id));
+          setSelectedParticipantIds(selectedIds);
+          
+          if (round.status === 'revealed') {
+            setCardSelections(allSelections);
+          }
+        }
+      } catch (error) {
+        console.error('Failed to restore room state:', error);
+      }
+    };
+
+    // T080: Monitor connection status and restore state on reconnection
+    const unsubscribe = connectionMonitor.subscribe((status) => {
+      if (status === 'connected' && room && participant) {
+        // Restore state when reconnected
+        restoreRoomState();
+      }
+    });
+
+    return unsubscribe;
+  }, [room, participant, refetchRoom]);
 
   // T048: Realtime callbacks
   const handleParticipantChange = useCallback(() => {
@@ -270,6 +317,7 @@ export default function RoomPage() {
   // T038: Integrate CardSelector component / T056: Show ResultsView when revealed
   return (
     <Layout>
+      <ReconnectionIndicator />
       <div style={{ padding: '20px' }}>
         <h2>Room: {room.code}</h2>
         <p>Welcome, {participant.display_name}!</p>
