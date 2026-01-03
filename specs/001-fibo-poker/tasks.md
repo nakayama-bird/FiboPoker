@@ -451,18 +451,87 @@ parallel ::: \
 
 ---
 
+## Phase 8: Security Improvements (Evaluated and Declined)
+
+**Status**: ❌ **Phase 8 は検討の結果、不採用としました**
+
+**Decision Date**: 2026-01-03
+
+### 📋 検討内容
+
+厳格なRow Level Security (RLS) ポリシーの実装を検討しましたが、以下の理由で不採用としました。
+
+### ❌ 不採用とした理由
+
+1. **ルームコードの性質**
+   - 8文字ランダム英数字 = 36^8 ≈ 2.8兆通り
+   - 推測攻撃は実質不可能
+   - コードを知っている = 参加権限がある、という設計思想
+
+2. **Planning Pokerの性質**
+   - 参加者リストは公開情報（ゲーム画面で全員に表示）
+   - カード選択結果も最終的に全員に公開
+   - 協調的なツールであり、情報の秘匿性よりも利便性を重視
+
+3. **既存の対策で十分**
+   - ✅ **なりすまし防止**: Supabase Anonymous Auth で `auth.uid()` による識別
+   - ✅ **データ改ざん防止**: カード選択・参加者レコードは本人のみ操作可能
+   - ✅ **不正操作防止**: ラウンド操作はオーナーのみ実行可能
+
+4. **実装の複雑性**
+   - 厳格なRLSポリシーは無限再帰の問題を引き起こす
+   - 参加者テーブルへの自己参照により、ポリシー評価が循環
+   - 回避策は存在するが、結果的に元の設計と同等の緩いポリシーになる
+
+### ✅ 現在のセキュリティ対策（十分）
+
+| 脅威 | 対策状況 | 実装箇所 |
+|-----|---------|---------|
+| なりすまし | ✅ 防止済み | Supabase Anonymous Auth (`session_id = auth.uid()`) |
+| カード選択改ざん | ✅ 防止済み | RLSポリシー（本人のみ操作可能） |
+| 不正なラウンド操作 | ✅ 防止済み | `is_owner` チェック |
+| ルームコード推測 | ✅ 実質不可能 | 36^8 通りのランダム生成 |
+
+### 📚 参考資料
+
+- 詳細な検討過程: `supabase/migrations/002_security_improvements.sql` (試行)
+- ロールバック: `supabase/migrations/003_rollback_security.sql` (実行済み)
+- 設計判断の記録: `README.md` セキュリティ設計セクション
+- PR: #14 (007-security-improvements ブランチ)
+
+### 💡 将来的な拡張案（必要に応じて）
+
+より厳格なアクセス制御が必要になった場合の選択肢：
+
+1. **パスワード保護機能**
+   - ルームごとにオプションでパスワード設定
+   - ルームコード + パスワードの二要素認証
+
+2. **Rate Limiting**
+   - Cloudflare Workers でルーム作成頻度を制限
+   - DDoS攻撃への対策
+
+3. **招待制ルーム**
+   - オーナーが参加者を明示的に承認
+   - よりクローズドなセッション向け
+
+---
+
 ## Summary
 
-- **Total Tasks**: 105
+- **Total Tasks**: 105 (Phase 8 excluded)
 - **User Story 1 (P1)**: 20 tasks (T024-T043) - MVP
 - **User Story 2 (P2)**: 20 tasks (T044-T063)
 - **User Story 3 (P3)**: 14 tasks (T064-T077)
 - **Setup + Foundational**: 23 tasks (T001-T023)
 - **Edge Cases**: 11 tasks (T078-T088)
-- **Polish**: 17 tasks (T089-T105)
+- **Polish (Phase 7)**: 17 tasks (T089-T105)
+- **Security (Phase 8)**: 10 tasks (T106-T115)
 
-**Parallel Opportunities**: 47 tasks marked [P] can run in parallel within their phases
+**Parallel Opportunities**: 52 tasks marked [P] can run in parallel within their phases
 
 **Suggested MVP Scope**: Phase 1 + Phase 2 + Phase 3 (User Story 1) = 43 tasks
+
+**Production Ready Scope**: MVP + Phase 4-7 + Phase 8 (最優先のみ) = 103 tasks
 
 **Constitution Compliance**: ✅ All tasks align with 7 constitution principles validated in [plan.md](plan.md)
