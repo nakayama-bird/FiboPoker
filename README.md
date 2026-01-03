@@ -37,26 +37,35 @@ FiboPokerは、アジャイル開発のプランニングポーカーをオン�
 
 ### システム構成図
 
-```
-┌─────────────┐
-│   Browser   │ ← ユーザー
-└──────┬──────┘
-       │ HTTPS
-       ↓
-┌─────────────────────┐
-│  Cloudflare Pages   │ ← Static Hosting + CDN
-│  (React SPA)        │
-└──────┬──────────────┘
-       │ WebSocket + REST API
-       ↓
-┌─────────────────────┐
-│     Supabase        │ ← Backend as a Service
-├─────────────────────┤
-│ • PostgreSQL        │ ← データ永続化
-│ • Realtime          │ ← WebSocket通信
-│ • Anonymous Auth    │ ← 匿名認証
-│ • Row Level Security│ ← アクセス制御
-└─────────────────────┘
+```mermaid
+graph TB
+    User[👤 ユーザー<br/>Browser]
+    
+    CDN[Cloudflare Pages<br/>Static Hosting + CDN<br/>React SPA]
+    
+    Supabase[Supabase<br/>Backend as a Service]
+    
+    subgraph "Supabase Services"
+        PG[(PostgreSQL<br/>データ永続化)]
+        RT[Realtime<br/>WebSocket通信]
+        Auth[Anonymous Auth<br/>匿名認証]
+        RLS[Row Level Security<br/>アクセス制御]
+    end
+    
+    User -->|HTTPS| CDN
+    CDN -->|WebSocket + REST API| Supabase
+    Supabase --> PG
+    Supabase --> RT
+    Supabase --> Auth
+    Supabase --> RLS
+    
+    style User fill:#e1f5ff
+    style CDN fill:#fff4e6
+    style Supabase fill:#f3e5f5
+    style PG fill:#e8f5e9
+    style RT fill:#e8f5e9
+    style Auth fill:#e8f5e9
+    style RLS fill:#e8f5e9
 ```
 
 ### データベース設計
@@ -97,157 +106,25 @@ card_selections (カード選択)
 └─ selected_at: timestamptz
 ```
 
-### インフラ構成
+### 技術的な特徴
 
-#### Cloudflare Pages
-- **ホスティング**: 静的サイト配信
-- **CDN**: グローバルエッジネットワークで高速配信
-- **デプロイ**: GitHubプッシュで自動デプロイ
-- **カスタムドメイン**: `fibopoker.pages.dev`
-- **HTTPS**: 自動SSL証明書
-
-#### Supabase
-- **PostgreSQL**: 
-  - データベースホスティング
-  - Row Level Security (RLS) によるアクセス制御
-  - トリガー・関数による自動処理
-  
-- **Realtime**: 
-  - WebSocketによるリアルタイム同期
-  - PostgreSQL LISTEN/NOTIFY機構を利用
-  - テーブル変更を即座にクライアントへ配信
-  
-- **Authentication**: 
-  - Anonymous Auth（匿名認証）
-  - セッションID発行でユーザー識別
-  - なりすまし防止
-
-### 技術的な特徴・工夫点
-
-#### 1. リアルタイム同期の実装
-
-**Supabase Realtime** を活用し、以下のテーブル変更を即座に全クライアントへ配信：
-
-- `participants`: 参加者の入退室をリアルタイム表示
-- `card_selections`: カード選択状況を即座に反映
-- `rounds`: ラウンド状態変更（selecting → revealed）を同期
-
-```typescript
-// 実装例: カード選択のリアルタイム監視
-supabase
-  .channel(`round:${roundId}`)
-  .on('postgres_changes', 
-    { event: '*', schema: 'public', table: 'card_selections' },
-    (payload) => handleCardSelection(payload)
-  )
-  .subscribe()
-```
-
-#### 2. 再接続処理
-
-ネットワーク切断時の自動再接続機能：
-
-- **接続監視**: Supabaseの接続状態を常時監視
-- **状態復元**: 再接続時にルーム状態を自動復元
-  - 現在のラウンド情報
-  - 自分のカード選択
-  - 他の参加者の選択状況
-- **UI通知**: 切断/再接続を視覚的に通知
-
-#### 3. 匿名認証とセキュリティ
-
-**Row Level Security (RLS)** によるきめ細かなアクセス制御：
-
-```sql
--- 例: カード選択は本人のみ操作可能
-CREATE POLICY "Allow users to insert their own card_selections" 
-ON card_selections FOR INSERT 
-WITH CHECK (
-  EXISTS (
-    SELECT 1 FROM participants
-    WHERE participants.id = card_selections.participant_id
-    AND participants.session_id = auth.uid()  -- Supabase Auth UID
-  )
-);
-```
-
-- セッションIDベースの認証
-- ユーザー登録不要で即座に利用可能
-- RLSにより不正なデータ操作を防止
-
-#### 4. 自動集計ロジック
-
-**PostgreSQL関数** で統計計算を実装：
-
-```sql
-CREATE OR REPLACE FUNCTION calculate_round_statistics(p_round_id uuid)
-RETURNS void AS $$
-DECLARE
-  v_max integer; v_min integer;
-  v_median numeric; v_avg numeric;
-BEGIN
-  -- 集約関数で統計計算
-  SELECT 
-    max(card_value), min(card_value),
-    percentile_cont(0.5) WITHIN GROUP (ORDER BY card_value),
-    avg(card_value)
-  INTO v_max, v_min, v_median, v_avg
-  FROM card_selections WHERE round_id = p_round_id;
-  
-  -- ラウンドを更新
-  UPDATE rounds SET 
-    status = 'revealed',
-    max_value = v_max, min_value = v_min,
-    median_value = v_median, avg_value = v_avg,
-    revealed_at = now()
-  WHERE id = p_round_id;
-END;
-$$ LANGUAGE plpgsql;
-```
-
-- クライアント側の複雑な計算処理を削減
-- データベース側で確実な計算を保証
-- パフォーマンスの向上
-
-#### 5. ルームコードによる簡易アクセス制御
-
-8文字のランダム英数字（小文字a-z + 0-9）:
-- 組み合わせ数: 36^8 = **2,821,109,907,456** 通り（約2.8兆）
-- 推測攻撃は実質不可能
-- URLを知っている = 参加権限がある、というシンプルな設計
+- **リアルタイム同期**: Supabase Realtimeで参加者・カード選択・ラウンド状態を即座に配信
+- **自動再接続**: ネットワーク切断時の状態復元とUI通知
+- **匿名認証**: Supabase Anonymous Authでユーザー登録不要
+- **Row Level Security**: セッションIDベースのアクセス制御
+- **DB側統計計算**: PostgreSQL関数で集計処理を実装
+- **ルームコードアクセス制御**: 8文字ランダム（36^8通り）で推測攻撃を防止
 
 ## セキュリティ設計
 
-### 認証とアクセス制御
-
-- **匿名認証**: Supabase Anonymous Authを使用し、なりすましを防止
-- **ルームコード**: 8文字のランダム英数字（36^8 = 約2.8兆通り）が実質的なアクセス制御として機能
-- **書き込み制御**: 
+- **匿名認証**: なりすまし防止（Supabase Anonymous Auth）
+- **ルームコード**: 8文字ランダム英数字（36^8 = 約2.8兆通り）で推測攻撃を防止
+- **Row Level Security**: 
   - カード選択は本人のみ操作可能（`session_id` チェック）
   - ラウンド操作はオーナーのみ実行可能（`is_owner` チェック）
   - 参加者レコードは本人のみ更新・削除可能
 
-### 設計判断の記録
-
-**Phase 8（厳格なRLSポリシー）を不採用とした理由:**
-
-1. **ルームコードの性質**
-   - 8文字ランダム = 推測攻撃は実質不可能
-   - コードを知っている = 参加権限がある、という設計思想
-   
-2. **Planning Pokerの性質**
-   - 参加者リストは公開情報（ゲーム画面で表示）
-   - カード選択結果も最終的に全員に公開
-   - 協調的なツールであり、情報の秘匿性は重要ではない
-
-3. **既存の対策で十分**
-   - なりすまし: 匿名認証で防止済み
-   - データ改ざん: 書き込み制御で防止済み
-   - 不正なラウンド操作: オーナーチェックで防止済み
-
-より厳格なアクセス制御が必要な場合は、将来的にパスワード保護機能を追加することも可能です。
-
-参考: `supabase/migrations/002`, `003` は試行錯誤の記録として残しています。
+**設計判断の記録**: より厳格なRLSポリシーを検討しましたが、Planning Pokerの協調的な性質と相性が悪いため不採用としました。詳細は [docs/security-decisions.md](docs/security-decisions.md) を参照。
 
 ## セットアップ
 
