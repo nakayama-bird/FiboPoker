@@ -12,6 +12,7 @@ import DisplayNameInput from './DisplayNameInput';
 import CardSelector from './CardSelector';
 import ResultsView from './ResultsView';
 import NewRoundButton from './NewRoundButton';
+import ForceRevealButton from './ForceRevealButton';
 import WaitingRoom from './WaitingRoom';
 import { InvitationLink } from './InvitationLink';
 import { ParticipantList } from './ParticipantList';
@@ -292,6 +293,29 @@ export default function RoomPage() {
     }
   };
 
+  // Handle force reveal (owner closes voting early)
+  const handleForceReveal = async () => {
+    if (!currentRound || currentRound.status !== 'selecting') return;
+
+    try {
+      // Calculate statistics with current selections only
+      await calculateStatistics(currentRound.id);
+      await updateRoundStatus(currentRound.id, 'revealed');
+      
+      // Load all selections for display
+      const allSelections = await getCardSelections(currentRound.id);
+      setCardSelections(allSelections);
+      
+      // Force refresh to show revealed state
+      if (refetchRoom) {
+        await refetchRoom();
+      }
+    } catch (err) {
+      console.error('Failed to force reveal:', err);
+      throw err;
+    }
+  };
+
   if (roomLoading) {
     return (
       <Layout>
@@ -371,12 +395,17 @@ export default function RoomPage() {
             <div style={{ marginTop: '20px' }}>
               
               {currentRound.status === 'selecting' ? (
-                <CardSelector 
-                  selectedCard={selectedCard}
-                  onSelect={handleCardSelect}
-                  disabled={selectedCard !== null}
-                  loading={selectingCard}
-                />
+                <>
+                  <CardSelector 
+                    selectedCard={selectedCard}
+                    onSelect={handleCardSelect}
+                    disabled={selectedCard !== null}
+                    loading={selectingCard}
+                  />
+                  {participant?.is_owner && (
+                    <ForceRevealButton onForceReveal={handleForceReveal} />
+                  )}
+                </>
               ) : (
                 <>
                   <ResultsView
