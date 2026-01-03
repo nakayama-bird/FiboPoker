@@ -33,38 +33,98 @@ FiboPokerは、アジャイル開発のプランニングポーカーをオン�
 - **Deployment**: Cloudflare Pages
 - **Authentication**: Supabase Anonymous Auth
 
+## アーキテクチャ
+
+### システム構成図
+
+```mermaid
+graph TB
+    User[👤 ユーザー<br/>Browser]
+    
+    CDN[Cloudflare Pages<br/>Static Hosting + CDN<br/>React SPA]
+    
+    Supabase[Supabase<br/>Backend as a Service]
+    
+    subgraph "Supabase Services"
+        PG[(PostgreSQL<br/>データ永続化)]
+        RT[Realtime<br/>WebSocket通信]
+        Auth[Anonymous Auth<br/>匿名認証]
+        RLS[Row Level Security<br/>アクセス制御]
+    end
+    
+    User -->|HTTPS| CDN
+    CDN -->|WebSocket + REST API| Supabase
+    Supabase --> PG
+    Supabase --> RT
+    Supabase --> Auth
+    Supabase --> RLS
+    
+    style User fill:#e1f5ff
+    style CDN fill:#fff4e6
+    style Supabase fill:#f3e5f5
+    style PG fill:#e8f5e9
+    style RT fill:#e8f5e9
+    style Auth fill:#e8f5e9
+    style RLS fill:#e8f5e9
+```
+
+### データベース設計
+
+```sql
+rooms (ルーム)
+├─ id: uuid (PK)
+├─ code: varchar(8) (Unique) -- 8文字ランダム英数字
+├─ created_at: timestamptz
+└─ updated_at: timestamptz
+
+participants (参加者)
+├─ id: uuid (PK)
+├─ room_id: uuid (FK → rooms)
+├─ session_id: uuid -- Supabase Auth UID
+├─ display_name: varchar(50)
+├─ is_owner: boolean
+├─ is_active: boolean
+└─ joined_at: timestamptz
+
+rounds (ラウンド)
+├─ id: uuid (PK)
+├─ room_id: uuid (FK → rooms)
+├─ round_number: integer
+├─ status: varchar(20) -- 'selecting' | 'revealed'
+├─ max_value: integer
+├─ min_value: integer
+├─ median_value: numeric(5,2)
+├─ avg_value: numeric(5,2)
+├─ revealed_at: timestamptz
+└─ created_at: timestamptz
+
+card_selections (カード選択)
+├─ id: uuid (PK)
+├─ round_id: uuid (FK → rounds)
+├─ participant_id: uuid (FK → participants)
+├─ card_value: integer -- フィボナッチ数
+└─ selected_at: timestamptz
+```
+
+### 技術的な特徴
+
+- **リアルタイム同期**: Supabase Realtimeで参加者・カード選択・ラウンド状態を即座に配信
+- **自動再接続**: ネットワーク切断時の状態復元とUI通知
+- **匿名認証**: Supabase Anonymous Authでユーザー登録不要
+- **Row Level Security**: セッションIDベースのアクセス制御
+- **DB側統計計算**: PostgreSQL関数で集計処理を実装
+- **ルームコードアクセス制御**: 8文字ランダム（36^8通り）で推測攻撃を防止
+
 ## セキュリティ設計
 
-### 認証とアクセス制御
-
-- **匿名認証**: Supabase Anonymous Authを使用し、なりすましを防止
-- **ルームコード**: 8文字のランダム英数字（36^8 = 約2.8兆通り）が実質的なアクセス制御として機能
-- **書き込み制御**: 
+- **匿名認証**: なりすまし防止（Supabase Anonymous Auth）
+- **ルームコード**: 8文字ランダム英数字（36^8 = 約2.8兆通り）で推測攻撃を防止
+- **Row Level Security**: 
   - カード選択は本人のみ操作可能（`session_id` チェック）
   - ラウンド操作はオーナーのみ実行可能（`is_owner` チェック）
   - 参加者レコードは本人のみ更新・削除可能
 
-### 設計判断の記録
-
-**Phase 8（厳格なRLSポリシー）を不採用とした理由:**
-
-1. **ルームコードの性質**
-   - 8文字ランダム = 推測攻撃は実質不可能
-   - コードを知っている = 参加権限がある、という設計思想
-   
-2. **Planning Pokerの性質**
-   - 参加者リストは公開情報（ゲーム画面で表示）
-   - カード選択結果も最終的に全員に公開
-   - 協調的なツールであり、情報の秘匿性は重要ではない
-
-3. **既存の対策で十分**
-   - なりすまし: 匿名認証で防止済み
-   - データ改ざん: 書き込み制御で防止済み
-   - 不正なラウンド操作: オーナーチェックで防止済み
-
-より厳格なアクセス制御が必要な場合は、将来的にパスワード保護機能を追加することも可能です。
-
-参考: `supabase/migrations/002`, `003` は試行錯誤の記録として残しています。
+**設計判断の記録**: より厳格なRLSポリシーを検討しましたが、Planning Pokerの協調的な性質と相性が悪いため不採用としました。詳細は [docs/security-decisions.md](docs/security-decisions.md) を参照。
 
 ## セットアップ
 
